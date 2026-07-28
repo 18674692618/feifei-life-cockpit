@@ -1,21 +1,21 @@
 :root {
-  --bg: #fff8df;
+  --bg: #faf7ed;
   --paper: #ffffff;
-  --paper-2: #fffdf5;
+  --paper-2: rgba(255, 255, 255, 0.66);
   --ink: #121512;
   --muted: #7a7162;
-  --line: #f0e3bf;
+  --line: rgba(238, 224, 190, 0.82);
   --green: #ffc928;
   --green-deep: #b56c00;
-  --green-2: #fff2bd;
-  --mint: #ffeaa0;
+  --green-2: rgba(255, 242, 189, 0.72);
+  --mint: rgba(255, 234, 160, 0.62);
   --blue: #f2a900;
   --blue-2: #fff4cf;
   --gold: #f2b400;
   --gold-2: #fff4c2;
   --red: #df6d61;
   --red-2: #fff0ed;
-  --shadow: 0 14px 42px rgba(113, 76, 0, 0.08);
+  --shadow: 0 14px 38px rgba(113, 76, 0, 0.07);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
@@ -25,8 +25,8 @@
 
 body {
   background:
-    radial-gradient(circle at 18% 0%, rgba(255, 214, 76, 0.34), transparent 34%),
-    linear-gradient(180deg, #fffdf4 0%, var(--bg) 34%, #ffffff 100%);
+    radial-gradient(circle at 20% -8%, rgba(255, 216, 88, 0.2), transparent 32%),
+    linear-gradient(180deg, #fffdf7 0%, var(--bg) 42%, #ffffff 100%);
   color: var(--ink);
   margin: 0;
 }
@@ -51,11 +51,11 @@ button {
 
 .app-header {
   align-items: center;
-  background: rgba(255, 255, 255, 0.84);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(241, 225, 186, 0.9);
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(22px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 8px;
-  box-shadow: 0 8px 26px rgba(113, 76, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(113, 76, 0, 0.06);
   display: flex;
   gap: 12px;
   justify-content: space-between;
@@ -119,8 +119,9 @@ h3 {
 
 .icon-button {
   align-items: center;
-  background: var(--paper);
-  border: 1px solid rgba(241, 225, 186, 0.95);
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(238, 224, 190, 0.85);
   border-radius: 8px;
   color: var(--ink);
   display: inline-flex;
@@ -139,11 +140,11 @@ h3 {
 }
 
 .module-tabs {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--line);
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.08);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px) saturate(1.35);
   display: grid;
   gap: 0;
   grid-template-columns: repeat(4, 1fr);
@@ -292,7 +293,8 @@ h3 {
 .hero-card,
 .panel,
 .metric-card {
-  background: var(--paper);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(1.25);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
@@ -305,7 +307,7 @@ h3 {
 
 .hero-card:hover,
 .panel:hover {
-  box-shadow: 0 18px 46px rgba(113, 76, 0, 0.1);
+  box-shadow: 0 18px 46px rgba(113, 76, 0, 0.09);
 }
 
 .hero-card {
@@ -333,7 +335,7 @@ h3 {
 
 .asset-hero {
   background:
-    linear-gradient(135deg, rgba(18, 21, 18, 0.96), rgba(181, 108, 0, 0.9)),
+    linear-gradient(135deg, rgba(18, 21, 18, 0.95), rgba(181, 108, 0, 0.86)),
     #121512;
   color: white;
   position: relative;
@@ -341,7 +343,7 @@ h3 {
 }
 
 .asset-hero::after {
-  background: rgba(255, 222, 106, 0.2);
+  background: rgba(255, 222, 106, 0.18);
   border-radius: 999px;
   bottom: -72px;
   content: "";
@@ -372,7 +374,7 @@ h3 {
 }
 
 .mini-progress {
-  background: #fff3cf;
+  background: rgba(255, 242, 207, 0.88);
   border-radius: 999px;
   height: 12px;
   margin-top: 28px;
@@ -452,7 +454,8 @@ h3 {
 input,
 textarea,
 select {
-  background: white;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
@@ -575,7 +578,8 @@ select:focus {
 .asset-bar,
 .change-card {
   background: var(--paper-2);
-  border: 1px solid rgba(241, 225, 186, 0.95);
+  backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(238, 224, 190, 0.76);
   border-radius: 8px;
   padding: 14px;
 }
@@ -621,14 +625,7 @@ select:focus {
 }
 
 .calendar-hint {
-  background: var(--green-2);
-  border-radius: 8px;
-  color: var(--green-deep);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.5;
-  margin: 0;
-  padding: 10px 12px;
+  display: none;
 }
 
 .calendar-weekdays,
@@ -647,8 +644,9 @@ select:focus {
 
 .calendar-cell {
   aspect-ratio: 1;
-  background: #ffffff;
-  border: 1px solid rgba(241, 225, 186, 0.95);
+  background: rgba(255, 255, 255, 0.64);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(238, 224, 190, 0.74);
   border-radius: 8px;
   color: var(--ink);
   display: grid;
@@ -666,12 +664,12 @@ select:focus {
 }
 
 .calendar-cell.trained {
-  background: linear-gradient(180deg, #fff8d8, #ffef9d);
-  border-color: rgba(255, 201, 40, 0.6);
+  background: rgba(255, 244, 199, 0.78);
+  border-color: rgba(255, 201, 40, 0.62);
 }
 
 .calendar-cell:not(.trained):hover {
-  background: #fffdf3;
+  background: rgba(255, 253, 243, 0.86);
   border-color: var(--green);
 }
 
@@ -755,7 +753,8 @@ select:focus {
 
 .snapshot-item {
   background: var(--paper-2);
-  border: 1px solid rgba(241, 225, 186, 0.95);
+  backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(238, 224, 190, 0.76);
   border-radius: 8px;
   padding: 14px;
 }
@@ -775,7 +774,7 @@ select:focus {
 }
 
 .bar-track {
-  background: #fff2cf;
+  background: rgba(255, 242, 207, 0.86);
   border-radius: 999px;
   height: 11px;
   overflow: hidden;
@@ -847,7 +846,8 @@ select:focus {
 
 .trip-body {
   background: var(--paper-2);
-  border: 1px solid rgba(241, 225, 186, 0.95);
+  backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(238, 224, 190, 0.76);
   border-radius: 8px;
   padding: 16px;
 }
@@ -951,7 +951,7 @@ body.hide-money .money-text::after {
 
 @media (max-width: 640px) {
   .app-shell {
-    padding: 8px 10px 106px;
+    padding: 8px 10px 96px;
   }
 
   .app-header {
@@ -975,12 +975,12 @@ body.hide-money .money-text::after {
   .module-tabs {
     border-radius: 18px 18px 0 0;
     bottom: 10px;
-    box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.12);
+    box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.1);
     grid-template-columns: repeat(4, 1fr);
     left: 10px;
     margin-bottom: 0;
-    min-height: 74px;
-    padding: 8px 10px 10px;
+    min-height: 70px;
+    padding: 7px 10px 9px;
     position: fixed;
     right: 10px;
     top: auto;
@@ -989,11 +989,11 @@ body.hide-money .money-text::after {
 
   .module-tab {
     gap: 4px;
-    min-height: 54px;
+    min-height: 52px;
   }
 
   .tab-icon {
-    height: 27px;
+    height: 26px;
     width: 30px;
   }
 
@@ -1048,7 +1048,7 @@ body.hide-money .money-text::after {
 
   .module-tab.active::after,
   .module-tab[aria-selected="true"]::after {
-    bottom: -6px;
+    bottom: -5px;
     height: 3px;
     width: 16px;
   }
