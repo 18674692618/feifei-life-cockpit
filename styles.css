@@ -668,6 +668,11 @@ select:focus {
   border-color: rgba(255, 201, 40, 0.62);
 }
 
+.calendar-cell.loved:not(.trained) {
+  background: rgba(255, 238, 246, 0.78);
+  border-color: rgba(246, 120, 168, 0.46);
+}
+
 .calendar-cell:not(.trained):hover {
   background: rgba(255, 253, 243, 0.86);
   border-color: var(--green);
@@ -694,16 +699,35 @@ select:focus {
   font-size: 13px;
 }
 
-.calendar-cell .workout-mark {
+.calendar-marks {
   align-items: center;
-  background: var(--green);
-  border-radius: 999px;
-  color: white;
+  bottom: 8px;
   display: flex;
-  font-size: 12px;
+  gap: 4px;
+  left: 8px;
+  position: absolute;
+}
+
+.calendar-cell .workout-mark,
+.calendar-cell .love-mark {
+  align-items: center;
+  border-radius: 999px;
+  display: flex;
   height: 22px;
   justify-content: center;
   width: 22px;
+}
+
+.calendar-cell .workout-mark {
+  background: var(--green);
+  color: white;
+  font-size: 12px;
+}
+
+.calendar-cell .love-mark {
+  background: #ff8fbd;
+  color: white;
+  font-size: 13px;
 }
 
 .calendar-cell small {

@@ -11,6 +11,7 @@ const defaultState = {
     { id: uid(), date: shiftDate(-2) },
     { id: uid(), date: shiftDate(-4) }
   ],
+  loveDays: [],
   monthlyRecords: [
     {
       month: currentMonth,
@@ -103,6 +104,7 @@ function loadState() {
 
 function normalizeState(nextState) {
   nextState.workouts = dedupeWorkoutDates(nextState.workouts || defaultState.workouts);
+  nextState.loveDays = dedupeDateRecords(nextState.loveDays || []);
   nextState.trips = Array.isArray(nextState.trips) ? nextState.trips : defaultState.trips;
   nextState.financeItems = Array.isArray(nextState.financeItems) ? nextState.financeItems : [];
   nextState.monthlyRecords = Array.isArray(nextState.monthlyRecords) && nextState.monthlyRecords.length
@@ -147,8 +149,12 @@ function migrateFinanceItemsToMonthlyRecords(items) {
 }
 
 function dedupeWorkoutDates(workouts) {
+  return dedupeDateRecords(workouts);
+}
+
+function dedupeDateRecords(records) {
   const seen = new Set();
-  return (workouts || []).filter((item) => {
+  return (records || []).filter((item) => {
     if (!item?.date || seen.has(item.date)) return false;
     seen.add(item.date);
     return true;
@@ -180,8 +186,9 @@ function bindNavigation() {
 
 function bindFitness() {
   $("#clearWorkoutsBtn").addEventListener("click", () => {
-    if (!confirm("清空所有训练记录吗？")) return;
+    if (!confirm("清空所有健身和爱爱记录吗？")) return;
     state.workouts = [];
+    state.loveDays = [];
     saveState();
     renderAll();
   });
@@ -407,9 +414,10 @@ function renderDashboard() {
 function renderFitness() {
   const week = workoutsThisWeek();
   const monthWorkouts = state.workouts.filter((item) => item.date.startsWith(selectedWorkoutMonth));
+  const monthLoveDays = state.loveDays.filter((item) => item.date.startsWith(selectedWorkoutMonth));
   $("#fitMonthDays").textContent = uniqueWorkoutDays(monthWorkouts);
   $("#fitWeekCount").textContent = uniqueWorkoutDays(week);
-  $("#fitTodayState").textContent = state.workouts.some((item) => item.date === todayISO) ? "已打卡" : "未打卡";
+  $("#fitLoveCount").textContent = uniqueDateRecords(monthLoveDays);
   $("#fitnessMonthTitle").textContent = `${formatMonthTitle(selectedWorkoutMonth)} 训练日历`;
   renderFitnessCalendar();
   renderSelectedWorkoutList();
@@ -422,18 +430,24 @@ function renderFitnessCalendar() {
     map.get(item.date).push(item);
     return map;
   }, new Map());
+  const loveDates = new Set(state.loveDays.map((item) => item.date));
 
   $("#fitnessCalendar").innerHTML = days
     .map((day) => {
       if (!day) return `<div class="calendar-cell empty" aria-hidden="true"></div>`;
       const date = `${selectedWorkoutMonth}-${String(day).padStart(2, "0")}`;
       const items = workoutsByDate.get(date) || [];
+      const hasLove = loveDates.has(date);
       const isToday = date === todayISO;
       const isSelected = date === selectedWorkoutDate;
       return `
-        <button class="calendar-cell ${items.length ? "trained" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" type="button" data-workout-date="${date}" aria-label="${date}，${items.length ? "已健身" : "未健身"}">
+        <button class="calendar-cell ${items.length ? "trained" : ""} ${hasLove ? "loved" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" type="button" data-workout-date="${date}" aria-label="${date}，${items.length ? "已健身" : "未健身"}，${hasLove ? "有爱爱" : "无爱爱"}">
           <span class="calendar-day">${day}</span>
-          ${items.length ? `<strong class="workout-mark" aria-hidden="true">●</strong><small>已健身</small>` : `<small class="tap-copy">点击记录</small>`}
+          <span class="calendar-marks">
+            ${items.length ? `<strong class="workout-mark" aria-hidden="true">●</strong>` : ""}
+            ${hasLove ? `<strong class="love-mark" aria-hidden="true">♥</strong>` : ""}
+          </span>
+          ${!items.length && !hasLove ? `<small class="tap-copy">选择</small>` : ""}
         </button>
       `;
     })
@@ -442,46 +456,64 @@ function renderFitnessCalendar() {
   $$("[data-workout-date]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedWorkoutDate = button.dataset.workoutDate;
-      const alreadyRecorded = state.workouts.some((item) => item.date === selectedWorkoutDate);
-      if (alreadyRecorded) {
-        state.workouts = state.workouts.filter((item) => item.date !== selectedWorkoutDate);
-        saveState();
-        renderAll();
-        toast("已取消健身记录");
-      } else {
-        addWorkoutCheckin(selectedWorkoutDate);
-        toast("已记录健身");
-      }
+      renderFitness();
     });
   });
 }
 
 function renderSelectedWorkoutList() {
   const selectedItems = sortedWorkouts().filter((item) => item.date === selectedWorkoutDate);
-  $("#selectedWorkoutTitle").textContent = `${formatDate(selectedWorkoutDate)} · ${selectedItems.length ? "已健身" : "未健身"}`;
-  $("#selectedWorkoutList").innerHTML = selectedItems.length
-    ? `
+  const hasLove = state.loveDays.some((item) => item.date === selectedWorkoutDate);
+  const status = [
+    selectedItems.length ? "已健身" : "未健身",
+    hasLove ? "有爱爱" : ""
+  ].filter(Boolean).join(" · ");
+  $("#selectedWorkoutTitle").textContent = `${formatDate(selectedWorkoutDate)} · ${status}`;
+  $("#selectedWorkoutList").innerHTML = `
       <article class="log-item">
-        <div><strong>今天健身了</strong><div class="muted">日历上已出现健身小图标。</div></div>
-        <button class="text-button danger" type="button" data-delete-workout="${selectedWorkoutDate}">取消</button>
+        <div><strong>${selectedItems.length ? "今天健身了" : "今天还没健身"}</strong></div>
+        <button class="text-button ${selectedItems.length ? "danger" : ""}" type="button" data-toggle-workout="${selectedWorkoutDate}">${selectedItems.length ? "取消健身" : "标记健身"}</button>
       </article>
-    `
-    : `<div class="muted">这一天还没有健身记录。点日历上的日期就能打卡。</div>`;
+      <article class="log-item">
+        <div><strong>${hasLove ? "今天有爱爱" : "今天没有爱爱"}</strong></div>
+        <button class="text-button ${hasLove ? "danger" : ""}" type="button" data-toggle-love="${selectedWorkoutDate}">${hasLove ? "取消爱爱" : "标记爱爱"}</button>
+      </article>
+    `;
 
-  $$("[data-delete-workout]").forEach((button) => {
+  $$("[data-toggle-workout]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.workouts = state.workouts.filter((item) => item.date !== button.dataset.deleteWorkout);
-      saveState();
-      renderAll();
+      toggleWorkoutCheckin(button.dataset.toggleWorkout);
+    });
+  });
+
+  $$("[data-toggle-love]").forEach((button) => {
+    button.addEventListener("click", () => {
+      toggleLoveCheckin(button.dataset.toggleLove);
     });
   });
 }
 
-function addWorkoutCheckin(date) {
-  state.workouts.unshift({
-    id: uid(),
-    date
-  });
+function toggleWorkoutCheckin(date) {
+  if (state.workouts.some((item) => item.date === date)) {
+    state.workouts = state.workouts.filter((item) => item.date !== date);
+    toast("已取消健身记录");
+  } else {
+    state.workouts.unshift({ id: uid(), date });
+    toast("已记录健身");
+  }
+  selectedWorkoutMonth = date.slice(0, 7);
+  saveState();
+  renderAll();
+}
+
+function toggleLoveCheckin(date) {
+  if (state.loveDays.some((item) => item.date === date)) {
+    state.loveDays = state.loveDays.filter((item) => item.date !== date);
+    toast("已取消爱爱");
+  } else {
+    state.loveDays.unshift({ id: uid(), date });
+    toast("已标记爱爱");
+  }
   selectedWorkoutMonth = date.slice(0, 7);
   saveState();
   renderAll();
@@ -653,7 +685,11 @@ function workoutsThisWeek() {
 }
 
 function uniqueWorkoutDays(workouts) {
-  return new Set(workouts.map((item) => item.date)).size;
+  return uniqueDateRecords(workouts);
+}
+
+function uniqueDateRecords(records) {
+  return new Set(records.map((item) => item.date)).size;
 }
 
 function sortedWorkouts() {
