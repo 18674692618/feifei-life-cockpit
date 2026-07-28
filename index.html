@@ -32,10 +32,37 @@
       </header>
 
       <nav class="module-tabs" aria-label="工作台模块">
-        <button class="module-tab active" type="button" data-view="dashboard" aria-selected="true">总览</button>
-        <button class="module-tab" type="button" data-view="fitness" aria-selected="false">健身</button>
-        <button class="module-tab" type="button" data-view="assets" aria-selected="false">资产</button>
-        <button class="module-tab" type="button" data-view="travel" aria-selected="false">旅游</button>
+        <button class="module-tab" type="button" data-view="fitness" aria-selected="false">
+          <svg class="tab-icon" viewBox="0 0 80 64" aria-hidden="true">
+            <path class="tab-stroke" d="M22 55c2-18 3-32 6-42 1-4 5-6 10-4 4 2 6 4 8 8 2-5 7-7 12-5 5 2 7 6 8 12l6 31" />
+            <path class="tab-stroke" d="M18 55h56M31 28c6 5 14 5 21 0" />
+          </svg>
+          <span class="tab-label">健身</span>
+        </button>
+        <button class="module-tab" type="button" data-view="assets" aria-selected="false">
+          <svg class="tab-icon" viewBox="0 0 80 64" aria-hidden="true">
+            <path class="tab-stroke" d="M17 51V23l23-12 23 12v28" />
+            <path class="tab-stroke" d="M27 51V33h26v18M33 23h14M33 42h14" />
+            <path class="tab-fill-green" d="M57 16c9 1 14 6 14 14 0 7-5 12-13 13" />
+          </svg>
+          <span class="tab-label">资产</span>
+        </button>
+        <button class="module-tab" type="button" data-view="travel" aria-selected="false">
+          <svg class="tab-icon" viewBox="0 0 80 64" aria-hidden="true">
+            <circle class="tab-fill-yellow" cx="42" cy="32" r="22" />
+            <path class="tab-stroke" d="M26 26c8-4 22-4 32 0M31 37c5 7 17 7 23 0" />
+            <path class="tab-stroke" d="M20 13c-4-3-7-3-9 1M62 11c5-5 10-5 13 0M34 23l-6-5M50 23l7-5" />
+          </svg>
+          <span class="tab-label">旅行</span>
+        </button>
+        <button class="module-tab active" type="button" data-view="dashboard" aria-selected="true">
+          <svg class="tab-icon" viewBox="0 0 80 64" aria-hidden="true">
+            <path class="tab-fill-yellow" d="M18 34c3-15 14-23 31-23 13 0 22 7 21 18-1 12-13 22-31 22-15 0-24-6-21-17Z" />
+            <circle class="tab-fill-blue" cx="35" cy="23" r="12" />
+            <path class="tab-stroke" d="M12 18 7 13M17 10l-2-7M62 12l6-6M70 24l8-1M20 50l-6 5" />
+          </svg>
+          <span class="tab-label">总览</span>
+        </button>
       </nav>
 
       <main>

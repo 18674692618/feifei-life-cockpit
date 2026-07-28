@@ -139,28 +139,32 @@ h3 {
 }
 
 .module-tabs {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 10px 26px rgba(36, 97, 44, 0.06);
+  box-shadow: 0 12px 30px rgba(36, 97, 44, 0.08);
   backdrop-filter: blur(16px);
   display: grid;
-  gap: 6px;
+  gap: 0;
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 10px;
-  padding: 4px;
+  padding: 8px 12px 10px;
   position: sticky;
   top: 10px;
   z-index: 10;
 }
 
 .module-tab {
+  align-items: center;
   background: transparent !important;
   border: 0;
-  border-radius: 7px;
-  color: var(--muted);
+  color: #a6aaa3;
+  display: grid;
+  gap: 3px;
   font-weight: 900;
-  min-height: 36px;
+  justify-items: center;
+  min-height: 70px;
+  position: relative;
   transition: color 0.18s ease, transform 0.18s ease;
 }
 
@@ -170,8 +174,74 @@ h3 {
 
 .module-tab.active,
 .module-tab[aria-selected="true"] {
-  background: var(--green) !important;
-  color: white;
+  background: transparent !important;
+  color: var(--ink);
+}
+
+.module-tab.active::after,
+.module-tab[aria-selected="true"]::after {
+  background: var(--green);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  bottom: 1px;
+  content: "";
+  height: 8px;
+  position: absolute;
+  width: 22px;
+}
+
+.tab-icon {
+  height: 38px;
+  overflow: visible;
+  width: 48px;
+}
+
+.tab-label {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.tab-stroke,
+.tab-fill-yellow,
+.tab-fill-blue,
+.tab-fill-green {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5.5;
+}
+
+.tab-stroke {
+  fill: none;
+}
+
+.tab-fill-yellow,
+.tab-fill-blue,
+.tab-fill-green {
+  fill: #fff;
+}
+
+.module-tab.active .tab-stroke,
+.module-tab[aria-selected="true"] .tab-stroke {
+  stroke: #20231f;
+}
+
+.module-tab.active .tab-fill-yellow,
+.module-tab[aria-selected="true"] .tab-fill-yellow {
+  fill: #ffe85c;
+  stroke: #20231f;
+}
+
+.module-tab.active .tab-fill-blue,
+.module-tab[aria-selected="true"] .tab-fill-blue {
+  fill: #8dddf6;
+  stroke: #20231f;
+}
+
+.module-tab.active .tab-fill-green,
+.module-tab[aria-selected="true"] .tab-fill-green {
+  fill: #8eea67;
+  stroke: #20231f;
 }
 
 .view {
@@ -860,7 +930,7 @@ body.hide-money .money-text::after {
 
 @media (max-width: 640px) {
   .app-shell {
-    padding: 8px 10px 92px;
+    padding: 8px 10px 106px;
   }
 
   .app-header {
@@ -884,10 +954,12 @@ body.hide-money .money-text::after {
   .module-tabs {
     border-radius: 8px;
     bottom: 10px;
-    box-shadow: 0 12px 36px rgba(18, 21, 18, 0.14);
+    box-shadow: 0 18px 42px rgba(18, 21, 18, 0.16);
     grid-template-columns: repeat(4, 1fr);
     left: 10px;
     margin-bottom: 0;
+    min-height: 78px;
+    padding: 9px 8px 10px;
     position: fixed;
     right: 10px;
     top: auto;
@@ -895,8 +967,17 @@ body.hide-money .money-text::after {
   }
 
   .module-tab {
+    gap: 3px;
+    min-height: 58px;
+  }
+
+  .tab-icon {
+    height: 32px;
+    width: 42px;
+  }
+
+  .tab-label {
     font-size: 12px;
-    min-height: 44px;
   }
 
   .section-head h2 {
@@ -940,8 +1021,15 @@ body.hide-money .money-text::after {
 
   .module-tab.active,
   .module-tab[aria-selected="true"] {
-    background: var(--green) !important;
-    color: white;
+    background: transparent !important;
+    color: var(--ink);
+  }
+
+  .module-tab.active::after,
+  .module-tab[aria-selected="true"]::after {
+    bottom: -1px;
+    height: 7px;
+    width: 18px;
   }
 
   .field-grid,

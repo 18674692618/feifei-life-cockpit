@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>底部导航预览</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        align-items: center;
+        background: #e8e8e5;
+        color: #171c17;
+        display: flex;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        justify-content: center;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      .preview {
+        align-items: center;
+        background: linear-gradient(180deg, #f1f1ef, #ddddda);
+        display: flex;
+        height: 320px;
+        justify-content: center;
+        padding: 28px;
+        width: min(920px, 100vw);
+      }
+
+      .bottom-nav {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.97);
+        box-shadow: 0 18px 42px rgba(39, 54, 34, 0.13);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        min-height: 112px;
+        padding: 16px 24px 14px;
+        width: min(760px, 100%);
+      }
+
+      .nav-item {
+        align-items: center;
+        color: #9da19a;
+        display: grid;
+        font-size: 18px;
+        font-weight: 900;
+        gap: 7px;
+        justify-items: center;
+        line-height: 1;
+        position: relative;
+      }
+
+      .nav-item.active {
+        color: #111611;
+      }
+
+      .nav-item.active::after {
+        background: #55c86d;
+        border: 3px solid #111611;
+        border-radius: 999px;
+        bottom: -10px;
+        content: "";
+        height: 9px;
+        position: absolute;
+        width: 24px;
+      }
+
+      .nav-item svg {
+        height: 46px;
+        overflow: visible;
+        width: 58px;
+      }
+
+      .stroke {
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 5.5;
+      }
+
+      .fill-yellow {
+        fill: #ffe85c;
+        stroke: #20231f;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 5.5;
+      }
+
+      .fill-blue {
+        fill: #8dddf6;
+        stroke: #20231f;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 5.5;
+      }
+
+      .fill-green {
+        fill: #8eea67;
+        stroke: #20231f;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 5.5;
+      }
+
+      .muted {
+        color: #a8aca5;
+      }
+
+      .muted .fill-yellow,
+      .muted .fill-blue,
+      .muted .fill-green {
+        fill: #ffffff;
+        stroke: currentColor;
+      }
+
+      @media (max-width: 520px) {
+        .preview {
+          height: 220px;
+          padding: 18px;
+        }
+
+        .bottom-nav {
+          min-height: 88px;
+          padding: 12px 12px 10px;
+        }
+
+        .nav-item {
+          font-size: 14px;
+          gap: 5px;
+        }
+
+        .nav-item.active::after {
+          bottom: -8px;
+          height: 7px;
+          width: 18px;
+        }
+
+        .nav-item svg {
+          height: 34px;
+          width: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="preview">
+      <nav class="bottom-nav" aria-label="底部导航预览">
+        <div class="nav-item muted">
+          <svg viewBox="0 0 80 64" aria-hidden="true">
+            <path class="stroke" d="M22 55c2-18 3-32 6-42 1-4 5-6 10-4 4 2 6 4 8 8 2-5 7-7 12-5 5 2 7 6 8 12l6 31" />
+            <path class="stroke" d="M18 55h56M31 28c6 5 14 5 21 0" />
+          </svg>
+          <span>健身</span>
+        </div>
+        <div class="nav-item muted">
+          <svg viewBox="0 0 80 64" aria-hidden="true">
+            <path class="stroke" d="M17 51V23l23-12 23 12v28" />
+            <path class="stroke" d="M27 51V33h26v18M33 23h14M33 42h14" />
+            <path class="fill-green" d="M57 16c9 1 14 6 14 14 0 7-5 12-13 13" />
+          </svg>
+          <span>资产</span>
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 80 64" aria-hidden="true">
+            <circle class="fill-yellow" cx="42" cy="32" r="22" />
+            <path class="stroke" d="M26 26c8-4 22-4 32 0M31 37c5 7 17 7 23 0" />
+            <path class="stroke" d="M20 13c-4-3-7-3-9 1M62 11c5-5 10-5 13 0M34 23l-6-5M50 23l7-5" />
+          </svg>
+          <span>旅行</span>
+        </div>
+        <div class="nav-item muted">
+          <svg viewBox="0 0 80 64" aria-hidden="true">
+            <path class="fill-yellow" d="M18 34c3-15 14-23 31-23 13 0 22 7 21 18-1 12-13 22-31 22-15 0-24-6-21-17Z" />
+            <circle class="fill-blue" cx="35" cy="23" r="12" />
+            <path class="stroke" d="M12 18 7 13M17 10l-2-7M62 12l6-6M70 24l8-1M20 50l-6 5" />
+          </svg>
+          <span>总览</span>
+        </div>
+      </nav>
+    </main>
+  </body>
+</html>
