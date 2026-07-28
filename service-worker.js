@@ -1,4 +1,4 @@
-const CACHE_NAME = "feifei-life-cockpit-v5";
+const CACHE_NAME = "feifei-life-cockpit-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

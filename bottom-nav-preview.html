@@ -11,7 +11,7 @@
 
       body {
         align-items: center;
-        background: #e8e8e5;
+        background: #fff8df;
         color: #171c17;
         display: flex;
         font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -22,7 +22,9 @@
 
       .preview {
         align-items: center;
-        background: linear-gradient(180deg, #f1f1ef, #ddddda);
+        background:
+          linear-gradient(180deg, rgba(255, 214, 76, 0.32), rgba(255, 255, 255, 0.92)),
+          #fff8df;
         display: flex;
         height: 320px;
         justify-content: center;
@@ -32,46 +34,50 @@
 
       .bottom-nav {
         align-items: center;
-        background: rgba(255, 255, 255, 0.97);
-        box-shadow: 0 18px 42px rgba(39, 54, 34, 0.13);
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid rgba(241, 225, 186, 0.95);
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.08);
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        min-height: 112px;
-        padding: 16px 24px 14px;
-        width: min(760px, 100%);
+        min-height: 82px;
+        padding: 9px 18px 11px;
+        width: min(430px, 100%);
       }
 
       .nav-item {
         align-items: center;
-        color: #9da19a;
+        color: #a3aaa0;
         display: grid;
-        font-size: 18px;
+        font-size: 13px;
         font-weight: 900;
-        gap: 7px;
+        gap: 4px;
         justify-items: center;
         line-height: 1;
         position: relative;
+        transition: color 0.18s ease, transform 0.18s ease;
       }
 
       .nav-item.active {
-        color: #111611;
+        color: #b56c00;
+        transform: translateY(-2px);
       }
 
       .nav-item.active::after {
-        background: #55c86d;
-        border: 3px solid #111611;
+        background: #ffc928;
+        border: 0;
         border-radius: 999px;
-        bottom: -10px;
+        bottom: -7px;
         content: "";
-        height: 9px;
+        height: 3px;
         position: absolute;
-        width: 24px;
+        width: 18px;
       }
 
       .nav-item svg {
-        height: 46px;
+        height: 28px;
         overflow: visible;
-        width: 58px;
+        width: 30px;
       }
 
       .stroke {
@@ -79,42 +85,50 @@
         stroke: currentColor;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-width: 5.5;
+        stroke-width: 5;
       }
 
       .fill-yellow {
-        fill: #ffe85c;
-        stroke: #20231f;
+        fill: currentColor;
+        stroke: currentColor;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-width: 5.5;
+        stroke-width: 5;
       }
 
       .fill-blue {
-        fill: #8dddf6;
-        stroke: #20231f;
+        fill: #ffffff;
+        stroke: currentColor;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-width: 5.5;
+        stroke-width: 5;
       }
 
       .fill-green {
-        fill: #8eea67;
-        stroke: #20231f;
+        fill: currentColor;
+        stroke: currentColor;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-width: 5.5;
+        stroke-width: 5;
       }
 
       .muted {
-        color: #a8aca5;
+        color: #a3aaa0;
       }
 
-      .muted .fill-yellow,
-      .muted .fill-blue,
-      .muted .fill-green {
-        fill: #ffffff;
-        stroke: currentColor;
+      .active .fill-yellow {
+        fill: #ffc928;
+        stroke: #b56c00;
+      }
+
+      .active .fill-blue {
+        fill: #fff8db;
+        stroke: #b56c00;
+      }
+
+      .active .fill-green {
+        fill: #ffc928;
+        stroke: #b56c00;
       }
 
       @media (max-width: 520px) {
@@ -124,24 +138,24 @@
         }
 
         .bottom-nav {
-          min-height: 88px;
-          padding: 12px 12px 10px;
+          min-height: 78px;
+          padding: 9px 14px 11px;
         }
 
         .nav-item {
-          font-size: 14px;
+          font-size: 12px;
           gap: 5px;
         }
 
         .nav-item.active::after {
-          bottom: -8px;
-          height: 7px;
-          width: 18px;
+          bottom: -6px;
+          height: 3px;
+          width: 16px;
         }
 
         .nav-item svg {
-          height: 34px;
-          width: 42px;
+          height: 27px;
+          width: 30px;
         }
       }
     </style>

@@ -1,21 +1,21 @@
 :root {
-  --bg: #f7fbf4;
+  --bg: #fff8df;
   --paper: #ffffff;
-  --paper-2: #f7faf4;
+  --paper-2: #fffdf5;
   --ink: #121512;
-  --muted: #72766f;
-  --line: #e9eee3;
-  --green: #55c66d;
-  --green-deep: #1f9f54;
-  --green-2: #edfbe9;
-  --mint: #dff8d8;
-  --blue: #5f91d8;
-  --blue-2: #eef5ff;
-  --gold: #d1a54c;
-  --gold-2: #fff8dc;
+  --muted: #7a7162;
+  --line: #f0e3bf;
+  --green: #ffc928;
+  --green-deep: #b56c00;
+  --green-2: #fff2bd;
+  --mint: #ffeaa0;
+  --blue: #f2a900;
+  --blue-2: #fff4cf;
+  --gold: #f2b400;
+  --gold-2: #fff4c2;
   --red: #df6d61;
   --red-2: #fff0ed;
-  --shadow: 0 14px 42px rgba(34, 82, 41, 0.08);
+  --shadow: 0 14px 42px rgba(113, 76, 0, 0.08);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
@@ -25,8 +25,8 @@
 
 body {
   background:
-    radial-gradient(circle at 18% 0%, rgba(164, 255, 126, 0.28), transparent 34%),
-    linear-gradient(180deg, #fbfff7 0%, var(--bg) 34%, #ffffff 100%);
+    radial-gradient(circle at 18% 0%, rgba(255, 214, 76, 0.34), transparent 34%),
+    linear-gradient(180deg, #fffdf4 0%, var(--bg) 34%, #ffffff 100%);
   color: var(--ink);
   margin: 0;
 }
@@ -53,9 +53,9 @@ button {
   align-items: center;
   background: rgba(255, 255, 255, 0.84);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 238, 219, 0.9);
+  border: 1px solid rgba(241, 225, 186, 0.9);
   border-radius: 8px;
-  box-shadow: 0 8px 26px rgba(34, 82, 41, 0.06);
+  box-shadow: 0 8px 26px rgba(113, 76, 0, 0.06);
   display: flex;
   gap: 12px;
   justify-content: space-between;
@@ -120,7 +120,7 @@ h3 {
 .icon-button {
   align-items: center;
   background: var(--paper);
-  border: 1px solid rgba(221, 235, 215, 0.95);
+  border: 1px solid rgba(241, 225, 186, 0.95);
   border-radius: 8px;
   color: var(--ink);
   display: inline-flex;
@@ -141,14 +141,14 @@ h3 {
 .module-tabs {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 12px 30px rgba(36, 97, 44, 0.08);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.08);
   backdrop-filter: blur(16px);
   display: grid;
   gap: 0;
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 10px;
-  padding: 8px 12px 10px;
+  padding: 9px 18px 11px;
   position: sticky;
   top: 10px;
   z-index: 10;
@@ -158,12 +158,12 @@ h3 {
   align-items: center;
   background: transparent !important;
   border: 0;
-  color: #a6aaa3;
+  color: #aaa394;
   display: grid;
-  gap: 3px;
+  gap: 4px;
   font-weight: 900;
   justify-items: center;
-  min-height: 70px;
+  min-height: 62px;
   position: relative;
   transition: color 0.18s ease, transform 0.18s ease;
 }
@@ -175,25 +175,31 @@ h3 {
 .module-tab.active,
 .module-tab[aria-selected="true"] {
   background: transparent !important;
-  color: var(--ink);
+  color: var(--green-deep);
+  transform: translateY(-2px);
+}
+
+.module-tab.active .tab-label,
+.module-tab[aria-selected="true"] .tab-label {
+  color: var(--green-deep);
 }
 
 .module-tab.active::after,
 .module-tab[aria-selected="true"]::after {
   background: var(--green);
-  border: 3px solid var(--ink);
+  border: 0;
   border-radius: 999px;
-  bottom: 1px;
+  bottom: -7px;
   content: "";
-  height: 8px;
+  height: 3px;
   position: absolute;
-  width: 22px;
+  width: 18px;
 }
 
 .tab-icon {
-  height: 38px;
+  height: 28px;
   overflow: visible;
-  width: 48px;
+  width: 30px;
 }
 
 .tab-label {
@@ -208,7 +214,7 @@ h3 {
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 5.5;
+  stroke-width: 5;
 }
 
 .tab-stroke {
@@ -223,25 +229,40 @@ h3 {
 
 .module-tab.active .tab-stroke,
 .module-tab[aria-selected="true"] .tab-stroke {
-  stroke: #20231f;
+  stroke: var(--green-deep);
 }
 
 .module-tab.active .tab-fill-yellow,
 .module-tab[aria-selected="true"] .tab-fill-yellow {
-  fill: #ffe85c;
-  stroke: #20231f;
+  fill: var(--green);
+  stroke: var(--green-deep);
 }
 
 .module-tab.active .tab-fill-blue,
 .module-tab[aria-selected="true"] .tab-fill-blue {
-  fill: #8dddf6;
-  stroke: #20231f;
+  fill: #fff8db;
+  stroke: var(--green-deep);
 }
 
 .module-tab.active .tab-fill-green,
 .module-tab[aria-selected="true"] .tab-fill-green {
-  fill: #8eea67;
-  stroke: #20231f;
+  fill: var(--green);
+  stroke: var(--green-deep);
+}
+
+.module-tab:not(.active)[aria-selected="false"] .tab-fill-yellow,
+.module-tab:not(.active)[aria-selected="false"] .tab-fill-blue,
+.module-tab:not(.active)[aria-selected="false"] .tab-fill-green {
+  fill: #fff;
+  stroke: #aaa394;
+}
+
+.module-tab:not(.active)[aria-selected="false"] .tab-stroke {
+  stroke: #aaa394;
+}
+
+.module-tab:not(.active)[aria-selected="false"] .tab-label {
+  color: #aaa394;
 }
 
 .view {
@@ -284,7 +305,7 @@ h3 {
 
 .hero-card:hover,
 .panel:hover {
-  box-shadow: 0 18px 46px rgba(34, 82, 41, 0.1);
+  box-shadow: 0 18px 46px rgba(113, 76, 0, 0.1);
 }
 
 .hero-card {
@@ -312,7 +333,7 @@ h3 {
 
 .asset-hero {
   background:
-    linear-gradient(135deg, rgba(18, 21, 18, 0.96), rgba(31, 159, 84, 0.9)),
+    linear-gradient(135deg, rgba(18, 21, 18, 0.96), rgba(181, 108, 0, 0.9)),
     #121512;
   color: white;
   position: relative;
@@ -320,7 +341,7 @@ h3 {
 }
 
 .asset-hero::after {
-  background: rgba(201, 255, 166, 0.2);
+  background: rgba(255, 222, 106, 0.2);
   border-radius: 999px;
   bottom: -72px;
   content: "";
@@ -332,7 +353,7 @@ h3 {
 
 .asset-hero .eyebrow,
 .asset-hero .hero-meta {
-  color: #c9ffa6;
+  color: #ffe68a;
 }
 
 .hero-number {
@@ -351,7 +372,7 @@ h3 {
 }
 
 .mini-progress {
-  background: #eef5e8;
+  background: #fff3cf;
   border-radius: 999px;
   height: 12px;
   margin-top: 28px;
@@ -463,7 +484,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(85, 198, 109, 0.16);
+  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);
 }
 
 .primary-button,
@@ -483,9 +504,9 @@ select:focus {
 }
 
 .primary-button {
-  background: var(--ink);
-  border: 1px solid var(--ink);
-  color: white;
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: var(--ink);
 }
 
 .secondary-button {
@@ -554,7 +575,7 @@ select:focus {
 .asset-bar,
 .change-card {
   background: var(--paper-2);
-  border: 1px solid rgba(229, 238, 223, 0.95);
+  border: 1px solid rgba(241, 225, 186, 0.95);
   border-radius: 8px;
   padding: 14px;
 }
@@ -627,7 +648,7 @@ select:focus {
 .calendar-cell {
   aspect-ratio: 1;
   background: #ffffff;
-  border: 1px solid rgba(229, 238, 223, 0.95);
+  border: 1px solid rgba(241, 225, 186, 0.95);
   border-radius: 8px;
   color: var(--ink);
   display: grid;
@@ -645,12 +666,12 @@ select:focus {
 }
 
 .calendar-cell.trained {
-  background: linear-gradient(180deg, #f3ffed, #e4fbde);
-  border-color: rgba(85, 198, 109, 0.48);
+  background: linear-gradient(180deg, #fff8d8, #ffef9d);
+  border-color: rgba(255, 201, 40, 0.6);
 }
 
 .calendar-cell:not(.trained):hover {
-  background: #f7fbf4;
+  background: #fffdf3;
   border-color: var(--green);
 }
 
@@ -734,7 +755,7 @@ select:focus {
 
 .snapshot-item {
   background: var(--paper-2);
-  border: 1px solid rgba(229, 238, 223, 0.95);
+  border: 1px solid rgba(241, 225, 186, 0.95);
   border-radius: 8px;
   padding: 14px;
 }
@@ -754,7 +775,7 @@ select:focus {
 }
 
 .bar-track {
-  background: #edf2e9;
+  background: #fff2cf;
   border-radius: 999px;
   height: 11px;
   overflow: hidden;
@@ -777,7 +798,7 @@ select:focus {
 }
 
 .photo-drop {
-  border: 1px dashed #c8dfbf;
+  border: 1px dashed #e6cb84;
   border-radius: 8px;
   cursor: pointer;
   padding: 14px;
@@ -826,7 +847,7 @@ select:focus {
 
 .trip-body {
   background: var(--paper-2);
-  border: 1px solid rgba(229, 238, 223, 0.95);
+  border: 1px solid rgba(241, 225, 186, 0.95);
   border-radius: 8px;
   padding: 16px;
 }
@@ -952,14 +973,14 @@ body.hide-money .money-text::after {
   }
 
   .module-tabs {
-    border-radius: 8px;
+    border-radius: 18px 18px 0 0;
     bottom: 10px;
-    box-shadow: 0 18px 42px rgba(18, 21, 18, 0.16);
+    box-shadow: 0 -8px 28px rgba(113, 76, 0, 0.12);
     grid-template-columns: repeat(4, 1fr);
     left: 10px;
     margin-bottom: 0;
-    min-height: 78px;
-    padding: 9px 8px 10px;
+    min-height: 74px;
+    padding: 8px 10px 10px;
     position: fixed;
     right: 10px;
     top: auto;
@@ -967,13 +988,13 @@ body.hide-money .money-text::after {
   }
 
   .module-tab {
-    gap: 3px;
-    min-height: 58px;
+    gap: 4px;
+    min-height: 54px;
   }
 
   .tab-icon {
-    height: 32px;
-    width: 42px;
+    height: 27px;
+    width: 30px;
   }
 
   .tab-label {
@@ -1022,14 +1043,14 @@ body.hide-money .money-text::after {
   .module-tab.active,
   .module-tab[aria-selected="true"] {
     background: transparent !important;
-    color: var(--ink);
+    color: var(--green-deep);
   }
 
   .module-tab.active::after,
   .module-tab[aria-selected="true"]::after {
-    bottom: -1px;
-    height: 7px;
-    width: 18px;
+    bottom: -6px;
+    height: 3px;
+    width: 16px;
   }
 
   .field-grid,
