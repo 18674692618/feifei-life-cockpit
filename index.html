@@ -7,6 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232f765e'/%3E%3Cpath d='M15 42h34M18 42c5-14 10-20 15-20s10 6 15 20' fill='none' stroke='%23f8f4ec' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='22' cy='20' r='5' fill='%23c48a2c'/%3E%3C/svg%3E" />
     <link rel="manifest" href="./public/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./public/app-icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="生活工作台" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="theme-color" content="#2f765e" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -19,6 +22,7 @@
           <p class="header-copy">把健身、家庭资产和旅行回忆放进同一个长期复盘系统。</p>
         </div>
         <div class="header-actions">
+          <button class="icon-button" id="installBtn" type="button" title="安装到桌面" aria-label="安装到桌面" hidden>＋</button>
           <button class="icon-button" id="privacyBtn" type="button" title="隐藏金额" aria-label="隐藏金额">◐</button>
           <button class="icon-button" id="exportBtn" type="button" title="导出数据" aria-label="导出数据">↓</button>
           <label class="icon-button" title="导入数据" aria-label="导入数据">

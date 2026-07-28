@@ -53,6 +53,7 @@ let state = loadState();
 let pendingPhotos = [];
 let selectedWorkoutMonth = currentMonth;
 let selectedWorkoutDate = todayISO;
+let deferredInstallPrompt = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -68,6 +69,8 @@ function init() {
   bindAssets();
   bindTravel();
   bindDataTools();
+  bindInstall();
+  registerServiceWorker();
   renderAll();
 }
 
@@ -271,6 +274,40 @@ function bindDataTools() {
     } finally {
       event.target.value = "";
     }
+  });
+}
+
+function bindInstall() {
+  const installBtn = $("#installBtn");
+  if (!installBtn) return;
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installBtn.hidden = false;
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) {
+      toast("手机浏览器里可通过分享菜单添加到主屏幕");
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBtn.hidden = true;
+  });
+
+  window.addEventListener("appinstalled", () => {
+    installBtn.hidden = true;
+    toast("已安装到桌面");
+  });
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
   });
 }
 
