@@ -7,9 +7,20 @@ const todayISO = today.toISOString().slice(0, 10);
 
 const defaultState = {
   workouts: [
-    { id: uid(), date: todayISO, type: "力量", minutes: 45, intensity: "适中", note: "下肢和核心，深蹲 4 组，状态不错。" },
-    { id: uid(), date: shiftDate(-2), type: "散步", minutes: 50, intensity: "轻松", note: "晚饭后快走，顺便整理思路。" },
-    { id: uid(), date: shiftDate(-4), type: "普拉提", minutes: 40, intensity: "较累", note: "肩颈打开很多。" }
+    { id: uid(), date: todayISO },
+    { id: uid(), date: shiftDate(-2) },
+    { id: uid(), date: shiftDate(-4) }
+  ],
+  monthlyRecords: [
+    {
+      month: currentMonth,
+      income: 58000,
+      expense: 15691,
+      familyBalance: 50700,
+      housingFund: 180000,
+      debt: 620000,
+      investment: 143000
+    }
   ],
   financeItems: [
     { id: uid(), month: currentMonth, kind: "asset", category: "固定资产", name: "自住房估值", amount: 4800000, owner: "家庭", note: "参考 Nestworth 原型：固定资产建议按季度更新估值。" },
@@ -77,17 +88,71 @@ function init() {
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return { ...defaultState, ...JSON.parse(saved) };
+    if (saved) return normalizeState({ ...defaultState, ...JSON.parse(saved) });
 
     const oldTrips = localStorage.getItem(oldTripKey);
     if (oldTrips) {
       const parsedTrips = JSON.parse(oldTrips);
-      if (Array.isArray(parsedTrips)) return { ...defaultState, trips: parsedTrips };
+      if (Array.isArray(parsedTrips)) return normalizeState({ ...defaultState, trips: parsedTrips });
     }
   } catch {
-    return structuredClone(defaultState);
+    return normalizeState(structuredClone(defaultState));
   }
-  return structuredClone(defaultState);
+  return normalizeState(structuredClone(defaultState));
+}
+
+function normalizeState(nextState) {
+  nextState.workouts = dedupeWorkoutDates(nextState.workouts || defaultState.workouts);
+  nextState.trips = Array.isArray(nextState.trips) ? nextState.trips : defaultState.trips;
+  nextState.financeItems = Array.isArray(nextState.financeItems) ? nextState.financeItems : [];
+  nextState.monthlyRecords = Array.isArray(nextState.monthlyRecords) && nextState.monthlyRecords.length
+    ? nextState.monthlyRecords.map(normalizeMonthlyRecord)
+    : migrateFinanceItemsToMonthlyRecords(nextState.financeItems);
+  return nextState;
+}
+
+function normalizeMonthlyRecord(record) {
+  return {
+    month: record.month || currentMonth,
+    income: Number(record.income || 0),
+    expense: Number(record.expense || 0),
+    familyBalance: Number(record.familyBalance || 0),
+    housingFund: Number(record.housingFund || 0),
+    debt: Number(record.debt || 0),
+    investment: Number(record.investment || 0)
+  };
+}
+
+function migrateFinanceItemsToMonthlyRecords(items) {
+  if (!items?.length) return structuredClone(defaultState.monthlyRecords);
+  const months = [...new Set(items.map((item) => item.month || currentMonth))];
+  return months.map((month) => {
+    const monthItems = items.filter((item) => (item.month || currentMonth) === month);
+    const categorySum = (category) => monthItems
+      .filter((item) => item.category === category)
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const kindSum = (kind) => monthItems
+      .filter((item) => item.kind === kind)
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    return {
+      month,
+      income: kindSum("income"),
+      expense: kindSum("expense"),
+      familyBalance: categorySum("现金资产"),
+      housingFund: 0,
+      debt: kindSum("debt"),
+      investment: categorySum("投资资产")
+    };
+  });
+}
+
+function dedupeWorkoutDates(workouts) {
+  const seen = new Set();
+  return (workouts || []).filter((item) => {
+    if (!item?.date || seen.has(item.date)) return false;
+    seen.add(item.date);
+    return true;
+  }).map((item) => ({ id: item.id || uid(), date: item.date }));
 }
 
 function saveState() {
@@ -95,7 +160,6 @@ function saveState() {
 }
 
 function setDefaultDates() {
-  $("#workoutDate").value = todayISO;
   $("#assetMonth").value = currentMonth;
 }
 
@@ -115,26 +179,6 @@ function bindNavigation() {
 }
 
 function bindFitness() {
-  $("#fitnessForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const date = $("#workoutDate").value;
-    state.workouts.unshift({
-      id: uid(),
-      date,
-      type: $("#workoutType").value,
-      minutes: Number($("#workoutMinutes").value || 30),
-      intensity: $("#workoutIntensity").value,
-      note: $("#workoutNote").value.trim()
-    });
-    selectedWorkoutDate = date;
-    selectedWorkoutMonth = date.slice(0, 7);
-    saveState();
-    $("#fitnessForm").reset();
-    $("#workoutDate").value = todayISO;
-    renderAll();
-    toast("训练已保存");
-  });
-
   $("#clearWorkoutsBtn").addEventListener("click", () => {
     if (!confirm("清空所有训练记录吗？")) return;
     state.workouts = [];
@@ -164,50 +208,25 @@ function bindFitness() {
 function bindAssets() {
   $("#assetForm").addEventListener("submit", (event) => {
     event.preventDefault();
-    state.financeItems.push({
-      id: uid(),
+    const record = normalizeMonthlyRecord({
       month: $("#assetMonth").value,
-      kind: $("#financeKind").value,
-      category: $("#financeCategory").value,
-      name: $("#financeName").value.trim(),
-      amount: Number($("#financeAmount").value),
-      owner: $("#financeOwner").value.trim() || "家庭",
-      note: $("#financeNote").value.trim()
+      income: $("#monthlyIncome").value,
+      expense: $("#monthlyExpense").value,
+      familyBalance: $("#familyBalance").value,
+      housingFund: $("#housingFund").value,
+      debt: $("#monthlyDebt").value,
+      investment: $("#investmentBalance").value
     });
+    state.monthlyRecords = [
+      record,
+      ...state.monthlyRecords.filter((item) => item.month !== record.month)
+    ].sort((a, b) => b.month.localeCompare(a.month));
     saveState();
-    $("#assetForm").reset();
-    $("#assetMonth").value = currentMonth;
     renderAll();
-    toast("已写入月度快照");
+    toast("本月家庭快照已保存");
   });
 
   $("#snapshotMonthFilter").addEventListener("change", renderAssets);
-
-  $("#copySnapshotBtn").addEventListener("click", () => {
-    const months = financeMonths();
-    const latest = months[0];
-    const sourceMonth = months[1] || latest;
-    if (!sourceMonth) return;
-    const copied = state.financeItems
-      .filter((item) => item.month === sourceMonth && ["asset", "debt"].includes(item.kind))
-      .map((item) => ({ ...item, id: uid(), month: currentMonth, note: `${item.note || ""} 由 ${sourceMonth} 复制。`.trim() }));
-    state.financeItems = state.financeItems.filter((item) => !(item.month === currentMonth && ["asset", "debt"].includes(item.kind))).concat(copied);
-    saveState();
-    renderAll();
-    toast("已复制上月资产与负债");
-  });
-
-  $("#simulateVoiceBtn").addEventListener("click", () => {
-    const drafts = [
-      { kind: "income", category: "工资奖金", name: "语音草稿：工资", amount: 20000, note: "模拟：工资两万。" },
-      { kind: "debt", category: "房贷", name: "语音草稿：房贷余额下降", amount: 5000, note: "模拟：房贷还了五千，正式版本应确认后入账。" },
-      { kind: "gain", category: "投资盈亏", name: "语音草稿：股票收益", amount: 3000, note: "模拟：股票涨了三千。" }
-    ];
-    state.financeItems.push(...drafts.map((item) => ({ id: uid(), month: selectedFinanceMonth(), owner: "家庭", ...item })));
-    saveState();
-    renderAll();
-    toast("已生成待确认语音草稿");
-  });
 }
 
 function bindTravel() {
@@ -236,11 +255,19 @@ function bindTravel() {
     state.trips = existing ? state.trips.map((trip) => (trip.id === id ? nextTrip : trip)) : [nextTrip, ...state.trips];
     saveState();
     resetTripForm();
+    $("#tripEditor").classList.add("is-collapsed");
     renderAll();
     toast("旅行已保存");
   });
 
   $("#resetTripBtn").addEventListener("click", resetTripForm);
+  $("#newTripBtn").addEventListener("click", () => {
+    resetTripForm();
+    openTripEditor();
+  });
+  $("#closeTripBtn").addEventListener("click", () => {
+    $("#tripEditor").classList.add("is-collapsed");
+  });
   $("#travelSearch").addEventListener("input", renderTravel);
   $("#travelYearFilter").addEventListener("change", renderTravel);
   $("#photos").addEventListener("change", async (event) => {
@@ -269,7 +296,7 @@ function bindDataTools() {
     if (!file) return;
     try {
       const data = JSON.parse(await file.text());
-      state = data.state || data;
+      state = normalizeState(data.state || data);
       saveState();
       renderAll();
       toast("数据已导入");
@@ -329,8 +356,8 @@ function renderDashboard() {
   const week = workoutsThisWeek();
 
   $("#dashNetWorth").textContent = formatMoney(finance.net);
-  $("#dashAssetChange").textContent = `较上月 ${formatSigned(finance.change)}`;
-  $("#dashDebtRatio").textContent = `负债率 ${finance.debtRatio.toFixed(1)}%`;
+  $("#dashAssetChange").textContent = `本月结余 ${formatSigned(finance.surplus)}`;
+  $("#dashDebtRatio").textContent = `负债 ${formatMoney(finance.debt)}`;
   $("#dashWorkoutCount").textContent = `${uniqueWorkoutDays(week)} 天`;
   $("#dashWorkoutProgress").style.width = `${Math.min((uniqueWorkoutDays(week) / 4) * 100, 100)}%`;
   $("#dashTravelCost").textContent = formatMoney(travelCost);
@@ -339,15 +366,15 @@ function renderDashboard() {
 
   $("#focusList").innerHTML = [
     ["练", uniqueWorkoutDays(week) >= 4 ? "本周锻炼已达标" : `本周还差 ${4 - uniqueWorkoutDays(week)} 天锻炼`, "日历点一下，就能把这个月哪些天动了记下来。"],
-    ["资", "更新本月资产快照", "资产方案采用每月一次盘点，不追求高频流水。"],
-    ["旅", recentTrip ? `补完 ${recentTrip.destination} 的照片或回忆` : "记录最近一次旅行", "以后按年份回看成本和回忆。"]
+    ["资", "更新本月家庭快照", "收入、支出、余额、公积金、负债、理财放在一张表。"],
+    ["旅", recentTrip ? `补完 ${recentTrip.destination} 的照片或回忆` : "新建一条旅行记录", "每年去了几次、花了多少一眼看到。"]
   ]
     .map(([icon, title, copy]) => `<div class="focus-item"><span class="focus-icon">${icon}</span><div><strong>${title}</strong><div class="muted">${copy}</div></div></div>`)
     .join("");
 
   $("#signalList").innerHTML = [
-    ["资产健康", finance.debtRatio > 45 ? "负债率偏高，适合重点复盘。" : "负债率处在可观察区间。"],
-    ["现金安全垫", finance.cash < 120000 ? "现金安全垫未达 12 万目标。" : "现金安全垫已达标。"],
+    ["家庭结余", finance.surplus >= 0 ? `本月结余 ${formatMoney(finance.surplus)}` : `本月超支 ${formatMoney(Math.abs(finance.surplus))}`],
+    ["家庭余额", `可用余额 + 公积金 + 理财：${formatMoney(finance.totalBalance)}`],
     ["旅行预算", travelCost > 0 ? `历史单次平均 ${formatMoney(Math.round(travelCost / state.trips.length))}` : "还没有旅行成本记录。"]
   ]
     .map(([title, copy]) => `<div class="signal-item"><strong>${title}</strong><span class="muted">${copy}</span></div>`)
@@ -359,7 +386,7 @@ function renderFitness() {
   const monthWorkouts = state.workouts.filter((item) => item.date.startsWith(selectedWorkoutMonth));
   $("#fitMonthDays").textContent = uniqueWorkoutDays(monthWorkouts);
   $("#fitWeekCount").textContent = uniqueWorkoutDays(week);
-  $("#fitWeekMinutes").textContent = week.reduce((sum, item) => sum + item.minutes, 0);
+  $("#fitTodayState").textContent = state.workouts.some((item) => item.date === todayISO) ? "已打卡" : "未打卡";
   $("#fitnessMonthTitle").textContent = `${formatMonthTitle(selectedWorkoutMonth)} 训练日历`;
   renderFitnessCalendar();
   renderSelectedWorkoutList();
@@ -378,13 +405,12 @@ function renderFitnessCalendar() {
       if (!day) return `<div class="calendar-cell empty" aria-hidden="true"></div>`;
       const date = `${selectedWorkoutMonth}-${String(day).padStart(2, "0")}`;
       const items = workoutsByDate.get(date) || [];
-      const minutes = items.reduce((sum, item) => sum + item.minutes, 0);
       const isToday = date === todayISO;
       const isSelected = date === selectedWorkoutDate;
       return `
-        <button class="calendar-cell ${items.length ? "trained" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" type="button" data-workout-date="${date}" aria-label="${date}，${items.length} 次训练">
+        <button class="calendar-cell ${items.length ? "trained" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" type="button" data-workout-date="${date}" aria-label="${date}，${items.length ? "已健身" : "未健身"}">
           <span class="calendar-day">${day}</span>
-          ${items.length ? `<strong>已锻炼</strong><small>${items.length} 次 · ${minutes} 分钟</small><i style="--dots:${Math.min(items.length, 4)}"></i>` : `<small class="tap-copy">点击记录</small>`}
+          ${items.length ? `<strong class="workout-mark" aria-hidden="true">●</strong><small>已健身</small>` : `<small class="tap-copy">点击记录</small>`}
         </button>
       `;
     })
@@ -393,13 +419,15 @@ function renderFitnessCalendar() {
   $$("[data-workout-date]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedWorkoutDate = button.dataset.workoutDate;
-      $("#workoutDate").value = selectedWorkoutDate;
       const alreadyRecorded = state.workouts.some((item) => item.date === selectedWorkoutDate);
-      if (!alreadyRecorded) {
-        addWorkoutCheckin(selectedWorkoutDate);
-        toast("已记录锻炼");
+      if (alreadyRecorded) {
+        state.workouts = state.workouts.filter((item) => item.date !== selectedWorkoutDate);
+        saveState();
+        renderAll();
+        toast("已取消健身记录");
       } else {
-        renderFitness();
+        addWorkoutCheckin(selectedWorkoutDate);
+        toast("已记录健身");
       }
     });
   });
@@ -407,20 +435,19 @@ function renderFitnessCalendar() {
 
 function renderSelectedWorkoutList() {
   const selectedItems = sortedWorkouts().filter((item) => item.date === selectedWorkoutDate);
-  const totalMinutes = selectedItems.reduce((sum, item) => sum + item.minutes, 0);
-  $("#selectedWorkoutTitle").textContent = `${formatDate(selectedWorkoutDate)} · ${selectedItems.length} 次 · ${totalMinutes} 分钟`;
-  $("#selectedWorkoutList").innerHTML = selectedItems
-    .map((item) => `
+  $("#selectedWorkoutTitle").textContent = `${formatDate(selectedWorkoutDate)} · ${selectedItems.length ? "已健身" : "未健身"}`;
+  $("#selectedWorkoutList").innerHTML = selectedItems.length
+    ? `
       <article class="log-item">
-        <div><strong>${escapeHtml(item.type)} · ${item.minutes} 分钟</strong><div class="muted">${item.intensity}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</div></div>
-        <button class="text-button danger" type="button" data-delete-workout="${item.id}">删除</button>
+        <div><strong>今天健身了</strong><div class="muted">日历上已出现健身小图标。</div></div>
+        <button class="text-button danger" type="button" data-delete-workout="${selectedWorkoutDate}">取消</button>
       </article>
-    `)
-    .join("") || `<div class="muted">这一天还没有锻炼记录。点日历上的日期就能直接打卡。</div>`;
+    `
+    : `<div class="muted">这一天还没有健身记录。点日历上的日期就能打卡。</div>`;
 
   $$("[data-delete-workout]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.workouts = state.workouts.filter((item) => item.id !== button.dataset.deleteWorkout);
+      state.workouts = state.workouts.filter((item) => item.date !== button.dataset.deleteWorkout);
       saveState();
       renderAll();
     });
@@ -430,11 +457,7 @@ function renderSelectedWorkoutList() {
 function addWorkoutCheckin(date) {
   state.workouts.unshift({
     id: uid(),
-    date,
-    type: "锻炼打卡",
-    minutes: 30,
-    intensity: "适中",
-    note: "日历点击记录。"
+    date
   });
   selectedWorkoutMonth = date.slice(0, 7);
   saveState();
@@ -445,29 +468,36 @@ function renderAssets() {
   renderFinanceMonthOptions();
   const month = selectedFinanceMonth();
   const summary = financeSummary(month);
-  $("#assetTotal").textContent = formatMoney(summary.assets);
-  $("#debtTotal").textContent = formatMoney(summary.debts);
+  const record = monthlyRecord(month);
+  fillMonthlyForm(record);
+  $("#monthlySurplus").textContent = formatSigned(summary.surplus);
+  $("#totalBalance").textContent = formatMoney(summary.totalBalance);
   $("#netWorth").textContent = formatMoney(summary.net);
 
-  const composition = groupByCategory(state.financeItems.filter((item) => item.month === month && ["asset", "debt"].includes(item.kind)));
-  const max = Math.max(...composition.map((item) => item.amount), 1);
-  $("#assetBars").innerHTML = composition
-    .map((item) => `
-      <div class="asset-bar">
-        <div class="asset-bar-top"><strong>${item.category}</strong><span class="money-text">${formatMoney(item.amount)}</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.max((item.amount / max) * 100, 4)}%;background:${item.kind === "debt" ? "var(--red)" : "var(--green)"}"></div></div>
-        <div class="muted">${item.count} 项 · ${item.kind === "debt" ? "负债" : "资产"}</div>
-      </div>
-    `)
+  $("#snapshotGrid").innerHTML = [
+    ["家庭收入", record.income],
+    ["总支出", record.expense],
+    ["家庭余额", record.familyBalance],
+    ["公积金余额", record.housingFund],
+    ["负债", record.debt],
+    ["理财", record.investment]
+  ]
+    .map(([label, value]) => `<div class="snapshot-item"><span>${label}</span><strong class="money-text">${formatMoney(value)}</strong></div>`)
     .join("");
 
-  $("#changeGrid").innerHTML = [
-    ["收入", summary.income, "green"],
-    ["支出", -summary.expense, "red"],
-    ["投资盈亏", summary.gain, summary.gain >= 0 ? "green" : "red"],
-    ["净资产变化", summary.change, summary.change >= 0 ? "green" : "red"]
-  ]
-    .map(([label, value, color]) => `<div class="change-card"><span class="muted">${label}</span><strong style="color:var(--${color})">${formatSigned(value)}</strong></div>`)
+  const trend = [...state.monthlyRecords].sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6);
+  const max = Math.max(...trend.map((item) => Math.abs(financeSummary(item.month).net)), 1);
+  $("#monthlyTrend").innerHTML = trend
+    .map((item) => {
+      const itemSummary = financeSummary(item.month);
+      return `
+        <div class="asset-bar">
+          <div class="asset-bar-top"><strong>${item.month}</strong><span class="money-text">${formatMoney(itemSummary.net)}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max((Math.abs(itemSummary.net) / max) * 100, 4)}%;background:var(--green)"></div></div>
+          <div class="muted">收入 ${formatMoney(item.income)} · 支出 ${formatMoney(item.expense)}</div>
+        </div>
+      `;
+    })
     .join("");
 }
 
@@ -475,19 +505,21 @@ function renderTravel() {
   const sorted = [...state.trips].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
   renderTravelYearOptions(sorted);
   const filtered = filterTrips(sorted);
-  const total = state.trips.reduce((sum, trip) => sum + Number(trip.cost || 0), 0);
-  $("#travelTotal").textContent = formatMoney(total);
+  const annualYear = selectedTravelYear(sorted);
+  const annualTrips = sorted.filter((trip) => new Date(trip.startDate).getFullYear().toString() === annualYear);
+  const annualTotal = annualTrips.reduce((sum, trip) => sum + Number(trip.cost || 0), 0);
+  $("#travelYearCount").textContent = `${annualTrips.length} 次`;
+  $("#travelYearTotal").textContent = formatMoney(annualTotal);
   $("#travelCount").textContent = state.trips.length;
-  $("#travelAvg").textContent = formatMoney(state.trips.length ? Math.round(total / state.trips.length) : 0);
 
-  const byYear = groupTripCostByYear(sorted);
-  const max = Math.max(...Object.values(byYear), 1);
+  const byYear = groupTripStatsByYear(sorted);
+  const max = Math.max(...Object.values(byYear).map((item) => item.cost), 1);
   $("#travelYearChart").innerHTML = Object.entries(byYear)
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([year, amount]) => `
+    .map(([year, item]) => `
       <div class="asset-bar">
-        <div class="asset-bar-top"><strong>${year}</strong><span class="money-text">${formatMoney(amount)}</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.max((amount / max) * 100, 4)}%;background:var(--gold)"></div></div>
+        <div class="asset-bar-top"><strong>${year} · ${item.count} 次</strong><span class="money-text">${formatMoney(item.cost)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max((item.cost / max) * 100, 4)}%;background:var(--green)"></div></div>
       </div>
     `)
     .join("");
@@ -520,34 +552,28 @@ function renderTravel() {
 }
 
 function financeSummary(month) {
-  const items = state.financeItems.filter((item) => item.month === month);
-  const assets = sumByKind(items, "asset");
-  const debts = sumByKind(items, "debt");
-  const income = sumByKind(items, "income");
-  const expense = sumByKind(items, "expense");
-  const gain = sumByKind(items, "gain");
-  const previous = previousMonth(month);
-  const previousNet = previous ? sumByKind(state.financeItems.filter((item) => item.month === previous), "asset") - sumByKind(state.financeItems.filter((item) => item.month === previous), "debt") : assets - debts;
-  const net = assets - debts;
+  const record = monthlyRecord(month);
+  const totalBalance = record.familyBalance + record.housingFund + record.investment;
+  const net = totalBalance - record.debt;
   return {
-    assets,
-    debts,
+    income: record.income,
+    expense: record.expense,
+    familyBalance: record.familyBalance,
+    housingFund: record.housingFund,
+    investment: record.investment,
+    debt: record.debt,
+    totalBalance,
     net,
-    income,
-    expense,
-    gain,
-    change: net - previousNet,
-    debtRatio: assets ? (debts / assets) * 100 : 0,
-    cash: items.filter((item) => item.category === "现金资产").reduce((sum, item) => sum + item.amount, 0)
+    surplus: record.income - record.expense
   };
 }
 
 function renderFinanceMonthOptions() {
   const selected = $("#snapshotMonthFilter").value || currentMonth;
-  $("#snapshotMonthFilter").innerHTML = financeMonths()
+  $("#snapshotMonthFilter").innerHTML = monthlyRecordMonths()
     .map((month) => `<option value="${month}">${month}</option>`)
     .join("");
-  $("#snapshotMonthFilter").value = financeMonths().includes(selected) ? selected : financeMonths()[0];
+  $("#snapshotMonthFilter").value = monthlyRecordMonths().includes(selected) ? selected : monthlyRecordMonths()[0];
 }
 
 function renderTravelYearOptions(trips) {
@@ -555,6 +581,14 @@ function renderTravelYearOptions(trips) {
   const years = [...new Set(trips.map((trip) => new Date(trip.startDate).getFullYear().toString()))].sort((a, b) => b.localeCompare(a));
   $("#travelYearFilter").innerHTML = `<option value="all">全部年份</option>${years.map((year) => `<option value="${year}">${year} 年</option>`).join("")}`;
   $("#travelYearFilter").value = years.includes(selected) ? selected : "all";
+}
+
+function selectedTravelYear(trips) {
+  const selected = $("#travelYearFilter").value;
+  if (selected && selected !== "all") return selected;
+  const thisYear = today.getFullYear().toString();
+  const years = [...new Set(trips.map((trip) => new Date(trip.startDate).getFullYear().toString()))];
+  return years.includes(thisYear) ? thisYear : years.sort((a, b) => b.localeCompare(a))[0] || thisYear;
 }
 
 function filterTrips(trips) {
@@ -578,10 +612,12 @@ function groupByCategory(items) {
   return [...map.values()].sort((a, b) => b.amount - a.amount);
 }
 
-function groupTripCostByYear(trips) {
+function groupTripStatsByYear(trips) {
   return trips.reduce((acc, trip) => {
     const year = new Date(trip.startDate).getFullYear();
-    acc[year] = (acc[year] || 0) + Number(trip.cost || 0);
+    if (!acc[year]) acc[year] = { count: 0, cost: 0 };
+    acc[year].count += 1;
+    acc[year].cost += Number(trip.cost || 0);
     return acc;
   }, {});
 }
@@ -634,22 +670,38 @@ function sumByKind(items, kind) {
   return items.filter((item) => item.kind === kind).reduce((sum, item) => sum + Number(item.amount || 0), 0);
 }
 
-function financeMonths() {
-  return [...new Set(state.financeItems.map((item) => item.month))].sort((a, b) => b.localeCompare(a));
+function monthlyRecord(month) {
+  return state.monthlyRecords.find((item) => item.month === month) || normalizeMonthlyRecord({ month });
+}
+
+function fillMonthlyForm(record) {
+  $("#assetMonth").value = record.month;
+  $("#monthlyIncome").value = record.income || "";
+  $("#monthlyExpense").value = record.expense || "";
+  $("#familyBalance").value = record.familyBalance || "";
+  $("#housingFund").value = record.housingFund || "";
+  $("#monthlyDebt").value = record.debt || "";
+  $("#investmentBalance").value = record.investment || "";
+}
+
+function monthlyRecordMonths() {
+  const months = [...new Set([currentMonth, ...state.monthlyRecords.map((item) => item.month)])];
+  return months.sort((a, b) => b.localeCompare(a));
 }
 
 function selectedFinanceMonth() {
-  return $("#snapshotMonthFilter")?.value || financeMonths()[0] || currentMonth;
+  return $("#snapshotMonthFilter")?.value || monthlyRecordMonths()[0] || currentMonth;
 }
 
 function previousMonth(month) {
-  const months = financeMonths().sort((a, b) => b.localeCompare(a));
+  const months = monthlyRecordMonths().sort((a, b) => b.localeCompare(a));
   return months[months.indexOf(month) + 1];
 }
 
 function editTrip(id) {
   const trip = state.trips.find((item) => item.id === id);
   if (!trip) return;
+  openTripEditor();
   $("#tripId").value = trip.id;
   $("#destination").value = trip.destination;
   $("#startDate").value = trip.startDate;
@@ -662,6 +714,10 @@ function editTrip(id) {
   pendingPhotos = trip.photos || [];
   renderPhotoPreview();
   $("#tripFormTitle").textContent = "编辑这次旅行";
+}
+
+function openTripEditor() {
+  $("#tripEditor").classList.remove("is-collapsed");
 }
 
 function deleteTrip(id) {

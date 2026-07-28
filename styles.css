@@ -330,6 +330,11 @@ h3 {
   grid-template-columns: minmax(310px, 410px) minmax(0, 1fr);
 }
 
+.single-column {
+  display: grid;
+  gap: 18px;
+}
+
 .content-stack {
   display: grid;
   gap: 16px;
@@ -607,6 +612,18 @@ select:focus {
   font-size: 13px;
 }
 
+.calendar-cell .workout-mark {
+  align-items: center;
+  background: var(--green);
+  border-radius: 999px;
+  color: white;
+  display: flex;
+  font-size: 12px;
+  height: 22px;
+  justify-content: center;
+  width: 22px;
+}
+
 .calendar-cell small {
   color: inherit;
   font-size: 11px;
@@ -644,6 +661,33 @@ select:focus {
   gap: 12px;
   justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.snapshot-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.snapshot-item {
+  background: var(--paper-2);
+  border: 1px solid rgba(229, 238, 223, 0.95);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.snapshot-item span {
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.snapshot-item strong {
+  display: block;
+  font-size: 20px;
+  overflow-wrap: anywhere;
 }
 
 .bar-track {
@@ -758,6 +802,15 @@ select:focus {
   margin-top: 12px;
 }
 
+.compact-button {
+  min-height: 40px;
+  padding-inline: 18px;
+}
+
+.is-collapsed {
+  display: none;
+}
+
 .danger {
   color: var(--red);
 }
@@ -852,6 +905,7 @@ body.hide-money .money-text::after {
   .field-grid,
   .metric-row,
   .change-grid,
+  .snapshot-grid,
   .trip-card,
   .trip-notes {
     grid-template-columns: 1fr;

@@ -98,41 +98,12 @@
               <h2>健身：点日历记录每月哪些天锻炼了</h2>
             </div>
           </div>
-          <section class="two-column">
-            <aside class="panel form-panel">
-              <h3>补充当天详情</h3>
-              <form id="fitnessForm" class="stack-form">
-                <label>日期<input id="workoutDate" type="date" required /></label>
-                <label>类型
-                  <select id="workoutType">
-                    <option>锻炼打卡</option>
-                    <option>力量</option>
-                    <option>有氧</option>
-                    <option>普拉提</option>
-                    <option>瑜伽</option>
-                    <option>散步</option>
-                  </select>
-                </label>
-                <div class="field-grid">
-                  <label>时长/分钟<input id="workoutMinutes" type="number" min="1" placeholder="默认 30" /></label>
-                  <label>强度
-                    <select id="workoutIntensity">
-                      <option>轻松</option>
-                      <option>适中</option>
-                      <option>较累</option>
-                      <option>爆汗</option>
-                    </select>
-                  </label>
-                </div>
-                <label>记录<textarea id="workoutNote" rows="3" placeholder="今天练了什么、状态如何"></textarea></label>
-                <button class="primary-button" type="submit">保存到选中日期</button>
-              </form>
-            </aside>
+          <section class="single-column">
             <section class="content-stack">
               <div class="metric-row">
                 <article class="metric-card"><span>当月锻炼天数</span><strong id="fitMonthDays">0</strong></article>
                 <article class="metric-card"><span>本周锻炼天数</span><strong id="fitWeekCount">0</strong></article>
-                <article class="metric-card"><span>本周分钟</span><strong id="fitWeekMinutes">0</strong></article>
+                <article class="metric-card"><span>今日状态</span><strong id="fitTodayState">未打卡</strong></article>
               </div>
               <article class="panel">
                 <div class="panel-title">
@@ -147,7 +118,7 @@
                   </div>
                 </div>
                 <div class="fitness-calendar" aria-label="训练日历">
-                  <p class="calendar-hint">点空白日期直接打卡；点已打卡日期查看当天记录。</p>
+                  <p class="calendar-hint">点日期记录健身；已健身日期会出现小图标，再点一次可取消。</p>
                   <div class="calendar-weekdays">
                     <span>一</span>
                     <span>二</span>
@@ -162,7 +133,7 @@
               </article>
               <article class="panel">
                 <div class="panel-title">
-                  <h3 id="selectedWorkoutTitle">当天训练</h3>
+                  <h3 id="selectedWorkoutTitle">当天状态</h3>
                   <button class="text-button" id="clearWorkoutsBtn" type="button">清空训练</button>
                 </div>
                 <div class="log-list" id="selectedWorkoutList"></div>
@@ -174,66 +145,48 @@
         <section class="view" id="assetsView" data-view-panel="assets">
           <div class="section-head">
             <div>
-              <p class="eyebrow">Monthly snapshot</p>
-              <h2>资产：每月一次家庭资产快照</h2>
+              <p class="eyebrow">Monthly money</p>
+              <h2>资产：记录每月家庭收入、支出和余额</h2>
             </div>
-            <button class="secondary-button" id="copySnapshotBtn" type="button">复制上月为本月</button>
           </div>
           <section class="asset-layout">
             <aside class="panel form-panel">
-              <h3>新增财务项</h3>
+              <h3>本月家庭快照</h3>
               <form id="assetForm" class="stack-form">
                 <label>月份<input id="assetMonth" type="month" required /></label>
-                <label>类型
-                  <select id="financeKind">
-                    <option value="asset">资产</option>
-                    <option value="debt">负债</option>
-                    <option value="income">收入</option>
-                    <option value="expense">支出</option>
-                    <option value="gain">投资盈亏</option>
-                  </select>
-                </label>
-                <label>分类
-                  <select id="financeCategory">
-                    <option>现金资产</option>
-                    <option>投资资产</option>
-                    <option>固定资产</option>
-                    <option>房贷</option>
-                    <option>车贷</option>
-                    <option>信用负债</option>
-                    <option>工资奖金</option>
-                    <option>家庭支出</option>
-                    <option>投资盈亏</option>
-                  </select>
-                </label>
                 <div class="field-grid">
-                  <label>名称<input id="financeName" placeholder="比如 招商银行卡" required /></label>
-                  <label>金额<input id="financeAmount" type="number" min="0" required /></label>
+                  <label>家庭收入<input id="monthlyIncome" type="number" min="0" placeholder="0" /></label>
+                  <label>总支出<input id="monthlyExpense" type="number" min="0" placeholder="0" /></label>
                 </div>
-                <label>归属成员<input id="financeOwner" placeholder="家庭 / 飞飞 / 老公" /></label>
-                <label>备注<textarea id="financeNote" rows="3" placeholder="估值日期、变化原因、提醒"></textarea></label>
-                <button class="primary-button" type="submit">写入月度快照</button>
+                <div class="field-grid">
+                  <label>家庭余额<input id="familyBalance" type="number" min="0" placeholder="0" /></label>
+                  <label>公积金余额<input id="housingFund" type="number" min="0" placeholder="0" /></label>
+                </div>
+                <div class="field-grid">
+                  <label>负债<input id="monthlyDebt" type="number" min="0" placeholder="0" /></label>
+                  <label>理财<input id="investmentBalance" type="number" min="0" placeholder="0" /></label>
+                </div>
+                <button class="primary-button" type="submit">保存这个月</button>
               </form>
             </aside>
             <section class="content-stack">
               <div class="metric-row">
-                <article class="metric-card"><span>总资产</span><strong class="money-text" id="assetTotal">¥0</strong></article>
-                <article class="metric-card"><span>总负债</span><strong class="money-text" id="debtTotal">¥0</strong></article>
+                <article class="metric-card"><span>本月结余</span><strong class="money-text" id="monthlySurplus">¥0</strong></article>
+                <article class="metric-card"><span>家庭总余额</span><strong class="money-text" id="totalBalance">¥0</strong></article>
                 <article class="metric-card"><span>净资产</span><strong class="money-text" id="netWorth">¥0</strong></article>
               </div>
               <article class="panel">
                 <div class="panel-title">
-                  <h3>资产构成</h3>
+                  <h3>月度记录</h3>
                   <select id="snapshotMonthFilter" aria-label="查看月份"></select>
                 </div>
-                <div class="asset-bars" id="assetBars"></div>
+                <div class="snapshot-grid" id="snapshotGrid"></div>
               </article>
               <article class="panel">
                 <div class="panel-title">
-                  <h3>本月变化拆解</h3>
-                  <button class="text-button" id="simulateVoiceBtn" type="button">模拟语音草稿</button>
+                  <h3>近几个月变化</h3>
                 </div>
-                <div class="change-grid" id="changeGrid"></div>
+                <div class="asset-bars" id="monthlyTrend"></div>
               </article>
             </section>
           </section>
@@ -245,9 +198,10 @@
               <p class="eyebrow">Travel timeline</p>
               <h2>旅游：成本、攻略、照片和回忆</h2>
             </div>
+            <button class="primary-button compact-button" id="newTripBtn" type="button">新建旅行</button>
           </div>
           <section class="two-column">
-            <aside class="panel form-panel">
+            <aside class="panel form-panel is-collapsed" id="tripEditor">
               <h3 id="tripFormTitle">记录一次旅行</h3>
               <form id="tripForm" class="stack-form">
                 <input id="tripId" type="hidden" />
@@ -272,14 +226,15 @@
                 <div class="button-row">
                   <button class="primary-button" type="submit">保存旅行</button>
                   <button class="secondary-button" id="resetTripBtn" type="button">清空</button>
+                  <button class="secondary-button" id="closeTripBtn" type="button">收起</button>
                 </div>
               </form>
             </aside>
             <section class="content-stack">
               <div class="metric-row">
-                <article class="metric-card"><span>总花费</span><strong class="money-text" id="travelTotal">¥0</strong></article>
-                <article class="metric-card"><span>旅行次数</span><strong id="travelCount">0</strong></article>
-                <article class="metric-card"><span>单次平均</span><strong class="money-text" id="travelAvg">¥0</strong></article>
+                <article class="metric-card"><span>年度旅行次数</span><strong id="travelYearCount">0</strong></article>
+                <article class="metric-card"><span>年度旅行费用</span><strong class="money-text" id="travelYearTotal">¥0</strong></article>
+                <article class="metric-card"><span>全部旅行次数</span><strong id="travelCount">0</strong></article>
               </div>
               <article class="panel">
                 <div class="panel-title">
