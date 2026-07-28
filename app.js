@@ -210,6 +210,14 @@ function bindFitness() {
     selectedWorkoutDate = todayISO;
     renderFitness();
   });
+
+  $("#toggleWorkoutBtn").addEventListener("click", () => {
+    toggleWorkoutCheckin(selectedWorkoutDate);
+  });
+
+  $("#toggleLoveBtn").addEventListener("click", () => {
+    toggleLoveCheckin(selectedWorkoutDate);
+  });
 }
 
 function bindAssets() {
@@ -419,8 +427,19 @@ function renderFitness() {
   $("#fitWeekCount").textContent = uniqueWorkoutDays(week);
   $("#fitLoveCount").textContent = uniqueDateRecords(monthLoveDays);
   $("#fitnessMonthTitle").textContent = `${formatMonthTitle(selectedWorkoutMonth)} 训练日历`;
+  renderSelectedDayControls();
   renderFitnessCalendar();
   renderSelectedWorkoutList();
+}
+
+function renderSelectedDayControls() {
+  const hasWorkout = state.workouts.some((item) => item.date === selectedWorkoutDate);
+  const hasLove = state.loveDays.some((item) => item.date === selectedWorkoutDate);
+  $("#selectedQuickTitle").textContent = formatDate(selectedWorkoutDate);
+  $("#toggleWorkoutBtn").textContent = hasWorkout ? "取消健身" : "标记健身";
+  $("#toggleWorkoutBtn").classList.toggle("active", hasWorkout);
+  $("#toggleLoveBtn").textContent = hasLove ? "取消爱爱" : "标记爱爱";
+  $("#toggleLoveBtn").classList.toggle("active", hasLove);
 }
 
 function renderFitnessCalendar() {
@@ -472,25 +491,11 @@ function renderSelectedWorkoutList() {
   $("#selectedWorkoutList").innerHTML = `
       <article class="log-item">
         <div><strong>${selectedItems.length ? "今天健身了" : "今天还没健身"}</strong></div>
-        <button class="text-button ${selectedItems.length ? "danger" : ""}" type="button" data-toggle-workout="${selectedWorkoutDate}">${selectedItems.length ? "取消健身" : "标记健身"}</button>
       </article>
       <article class="log-item">
         <div><strong>${hasLove ? "今天有爱爱" : "今天没有爱爱"}</strong></div>
-        <button class="text-button ${hasLove ? "danger" : ""}" type="button" data-toggle-love="${selectedWorkoutDate}">${hasLove ? "取消爱爱" : "标记爱爱"}</button>
       </article>
     `;
-
-  $$("[data-toggle-workout]").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleWorkoutCheckin(button.dataset.toggleWorkout);
-    });
-  });
-
-  $$("[data-toggle-love]").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleLoveCheckin(button.dataset.toggleLove);
-    });
-  });
 }
 
 function toggleWorkoutCheckin(date) {
