@@ -1,12 +1,13 @@
-const CACHE_NAME = "feifei-life-cockpit-v8";
+const CACHE_NAME = "feifei-life-cockpit-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./public/manifest.webmanifest",
-  "./public/app-icon.svg",
-  "./public/favicon.svg"
+  "./public/app-icon-192.png",
+  "./public/app-icon-512.png",
+  "./public/favicon.png"
 ];
 
 self.addEventListener("install", (event) => {
