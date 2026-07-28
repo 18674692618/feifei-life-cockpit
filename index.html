@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>飞飞子的生活工作台</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232f765e'/%3E%3Cpath d='M15 42h34M18 42c5-14 10-20 15-20s10 6 15 20' fill='none' stroke='%23f8f4ec' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='22' cy='20' r='5' fill='%23c48a2c'/%3E%3C/svg%3E" />
+    <link rel="manifest" href="./public/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./public/app-icon.svg" />
+    <meta name="theme-color" content="#2f765e" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Life cockpit</p>
+          <h1>飞飞子的生活工作台</h1>
+          <p class="header-copy">把健身、家庭资产和旅行回忆放进同一个长期复盘系统。</p>
+        </div>
+        <div class="header-actions">
+          <button class="icon-button" id="privacyBtn" type="button" title="隐藏金额" aria-label="隐藏金额">◐</button>
+          <button class="icon-button" id="exportBtn" type="button" title="导出数据" aria-label="导出数据">↓</button>
+          <label class="icon-button" title="导入数据" aria-label="导入数据">
+            ↑
+            <input id="importInput" type="file" accept="application/json" hidden />
+          </label>
+        </div>
+      </header>
+
+      <nav class="module-tabs" aria-label="工作台模块">
+        <button class="module-tab active" type="button" data-view="dashboard">总览</button>
+        <button class="module-tab" type="button" data-view="fitness">健身</button>
+        <button class="module-tab" type="button" data-view="assets">资产</button>
+        <button class="module-tab" type="button" data-view="travel">旅游</button>
+      </nav>
+
+      <main>
+        <section class="view active" id="dashboardView" data-view-panel="dashboard">
+          <section class="hero-grid">
+            <article class="hero-card asset-hero">
+              <p class="eyebrow">Nestworth</p>
+              <h2>本月家庭净资产</h2>
+              <strong class="hero-number money-text" id="dashNetWorth">¥0</strong>
+              <div class="hero-meta">
+                <span id="dashAssetChange">较上月 ¥0</span>
+                <span id="dashDebtRatio">负债率 0%</span>
+              </div>
+            </article>
+            <article class="hero-card">
+              <p class="eyebrow">Fitness</p>
+              <h2>本周训练完成</h2>
+              <strong class="hero-number" id="dashWorkoutCount">0 次</strong>
+              <div class="mini-progress"><span id="dashWorkoutProgress"></span></div>
+            </article>
+            <article class="hero-card">
+              <p class="eyebrow">Travel</p>
+              <h2>旅行成本与回忆</h2>
+              <strong class="hero-number money-text" id="dashTravelCost">¥0</strong>
+              <div class="hero-meta">
+                <span id="dashTripCount">0 次旅行</span>
+                <span id="dashLastTrip">暂无记录</span>
+              </div>
+            </article>
+          </section>
+
+          <section class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">Today</p>
+                  <h2>今天最值得做的三件事</h2>
+                </div>
+              </div>
+              <div class="focus-list" id="focusList"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">Review</p>
+                  <h2>生活复盘信号</h2>
+                </div>
+              </div>
+              <div class="signal-list" id="signalList"></div>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="fitnessView" data-view-panel="fitness">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Fitness calendar</p>
+              <h2>健身：点日历记录每月哪些天锻炼了</h2>
+            </div>
+          </div>
+          <section class="two-column">
+            <aside class="panel form-panel">
+              <h3>补充当天详情</h3>
+              <form id="fitnessForm" class="stack-form">
+                <label>日期<input id="workoutDate" type="date" required /></label>
+                <label>类型
+                  <select id="workoutType">
+                    <option>锻炼打卡</option>
+                    <option>力量</option>
+                    <option>有氧</option>
+                    <option>普拉提</option>
+                    <option>瑜伽</option>
+                    <option>散步</option>
+                  </select>
+                </label>
+                <div class="field-grid">
+                  <label>时长/分钟<input id="workoutMinutes" type="number" min="1" placeholder="默认 30" /></label>
+                  <label>强度
+                    <select id="workoutIntensity">
+                      <option>轻松</option>
+                      <option>适中</option>
+                      <option>较累</option>
+                      <option>爆汗</option>
+                    </select>
+                  </label>
+                </div>
+                <label>记录<textarea id="workoutNote" rows="3" placeholder="今天练了什么、状态如何"></textarea></label>
+                <button class="primary-button" type="submit">保存到选中日期</button>
+              </form>
+            </aside>
+            <section class="content-stack">
+              <div class="metric-row">
+                <article class="metric-card"><span>当月锻炼天数</span><strong id="fitMonthDays">0</strong></article>
+                <article class="metric-card"><span>本周锻炼天数</span><strong id="fitWeekCount">0</strong></article>
+                <article class="metric-card"><span>本周分钟</span><strong id="fitWeekMinutes">0</strong></article>
+              </div>
+              <article class="panel">
+                <div class="panel-title">
+                  <div>
+                    <p class="eyebrow">Calendar</p>
+                    <h3 id="fitnessMonthTitle">训练日历</h3>
+                  </div>
+                  <div class="calendar-actions">
+                    <button class="icon-button small" id="prevFitnessMonth" type="button" aria-label="上个月">‹</button>
+                    <button class="icon-button small" id="todayFitnessMonth" type="button" aria-label="回到今天">今</button>
+                    <button class="icon-button small" id="nextFitnessMonth" type="button" aria-label="下个月">›</button>
+                  </div>
+                </div>
+                <div class="fitness-calendar" aria-label="训练日历">
+                  <p class="calendar-hint">点空白日期直接打卡；点已打卡日期查看当天记录。</p>
+                  <div class="calendar-weekdays">
+                    <span>一</span>
+                    <span>二</span>
+                    <span>三</span>
+                    <span>四</span>
+                    <span>五</span>
+                    <span>六</span>
+                    <span>日</span>
+                  </div>
+                  <div class="calendar-grid" id="fitnessCalendar"></div>
+                </div>
+              </article>
+              <article class="panel">
+                <div class="panel-title">
+                  <h3 id="selectedWorkoutTitle">当天训练</h3>
+                  <button class="text-button" id="clearWorkoutsBtn" type="button">清空训练</button>
+                </div>
+                <div class="log-list" id="selectedWorkoutList"></div>
+              </article>
+            </section>
+          </section>
+        </section>
+
+        <section class="view" id="assetsView" data-view-panel="assets">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Monthly snapshot</p>
+              <h2>资产：每月一次家庭资产快照</h2>
+            </div>
+            <button class="secondary-button" id="copySnapshotBtn" type="button">复制上月为本月</button>
+          </div>
+          <section class="asset-layout">
+            <aside class="panel form-panel">
+              <h3>新增财务项</h3>
+              <form id="assetForm" class="stack-form">
+                <label>月份<input id="assetMonth" type="month" required /></label>
+                <label>类型
+                  <select id="financeKind">
+                    <option value="asset">资产</option>
+                    <option value="debt">负债</option>
+                    <option value="income">收入</option>
+                    <option value="expense">支出</option>
+                    <option value="gain">投资盈亏</option>
+                  </select>
+                </label>
+                <label>分类
+                  <select id="financeCategory">
+                    <option>现金资产</option>
+                    <option>投资资产</option>
+                    <option>固定资产</option>
+                    <option>房贷</option>
+                    <option>车贷</option>
+                    <option>信用负债</option>
+                    <option>工资奖金</option>
+                    <option>家庭支出</option>
+                    <option>投资盈亏</option>
+                  </select>
+                </label>
+                <div class="field-grid">
+                  <label>名称<input id="financeName" placeholder="比如 招商银行卡" required /></label>
+                  <label>金额<input id="financeAmount" type="number" min="0" required /></label>
+                </div>
+                <label>归属成员<input id="financeOwner" placeholder="家庭 / 飞飞 / 老公" /></label>
+                <label>备注<textarea id="financeNote" rows="3" placeholder="估值日期、变化原因、提醒"></textarea></label>
+                <button class="primary-button" type="submit">写入月度快照</button>
+              </form>
+            </aside>
+            <section class="content-stack">
+              <div class="metric-row">
+                <article class="metric-card"><span>总资产</span><strong class="money-text" id="assetTotal">¥0</strong></article>
+                <article class="metric-card"><span>总负债</span><strong class="money-text" id="debtTotal">¥0</strong></article>
+                <article class="metric-card"><span>净资产</span><strong class="money-text" id="netWorth">¥0</strong></article>
+              </div>
+              <article class="panel">
+                <div class="panel-title">
+                  <h3>资产构成</h3>
+                  <select id="snapshotMonthFilter" aria-label="查看月份"></select>
+                </div>
+                <div class="asset-bars" id="assetBars"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-title">
+                  <h3>本月变化拆解</h3>
+                  <button class="text-button" id="simulateVoiceBtn" type="button">模拟语音草稿</button>
+                </div>
+                <div class="change-grid" id="changeGrid"></div>
+              </article>
+            </section>
+          </section>
+        </section>
+
+        <section class="view" id="travelView" data-view-panel="travel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Travel timeline</p>
+              <h2>旅游：成本、攻略、照片和回忆</h2>
+            </div>
+          </div>
+          <section class="two-column">
+            <aside class="panel form-panel">
+              <h3 id="tripFormTitle">记录一次旅行</h3>
+              <form id="tripForm" class="stack-form">
+                <input id="tripId" type="hidden" />
+                <label>目的地<input id="destination" placeholder="京都、阿勒泰、巴黎" required /></label>
+                <div class="field-grid">
+                  <label>出发<input id="startDate" type="date" required /></label>
+                  <label>回来<input id="endDate" type="date" required /></label>
+                </div>
+                <div class="field-grid">
+                  <label>预算<input id="budget" type="number" min="0" /></label>
+                  <label>实际花费<input id="cost" type="number" min="0" required /></label>
+                </div>
+                <label>成员<input id="companions" placeholder="妈妈、朋友们、自己" /></label>
+                <label>攻略<textarea id="guide" rows="3" placeholder="路线、酒店、交通、餐厅、避坑点"></textarea></label>
+                <label>回忆<textarea id="memory" rows="3" placeholder="这一趟最想记住的瞬间"></textarea></label>
+                <label class="photo-drop">
+                  <input id="photos" type="file" accept="image/*" multiple hidden />
+                  <span>添加照片</span>
+                  <small>照片会保存在本机浏览器数据里</small>
+                </label>
+                <div id="photoPreview" class="photo-grid"></div>
+                <div class="button-row">
+                  <button class="primary-button" type="submit">保存旅行</button>
+                  <button class="secondary-button" id="resetTripBtn" type="button">清空</button>
+                </div>
+              </form>
+            </aside>
+            <section class="content-stack">
+              <div class="metric-row">
+                <article class="metric-card"><span>总花费</span><strong class="money-text" id="travelTotal">¥0</strong></article>
+                <article class="metric-card"><span>旅行次数</span><strong id="travelCount">0</strong></article>
+                <article class="metric-card"><span>单次平均</span><strong class="money-text" id="travelAvg">¥0</strong></article>
+              </div>
+              <article class="panel">
+                <div class="panel-title">
+                  <h3>年度旅行成本</h3>
+                  <select id="travelYearFilter" aria-label="筛选旅行年份"><option value="all">全部年份</option></select>
+                </div>
+                <div id="travelYearChart" class="asset-bars"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-title">
+                  <h3>旅行时间线</h3>
+                  <input class="inline-search" id="travelSearch" type="search" placeholder="搜索目的地、攻略、回忆" />
+                </div>
+                <div class="timeline" id="timeline"></div>
+              </article>
+            </section>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

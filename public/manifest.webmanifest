@@ -1,0 +1,17 @@
+{
+  "name": "飞飞子的生活工作台",
+  "short_name": "生活工作台",
+  "description": "健身日历、家庭资产快照和旅行回忆的个人生活工作台。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2efe8",
+  "theme_color": "#2f765e",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
