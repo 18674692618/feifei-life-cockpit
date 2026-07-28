@@ -103,7 +103,11 @@ function bindNavigation() {
   $$(".module-tab").forEach((button) => {
     button.addEventListener("click", () => {
       const view = button.dataset.view;
-      $$(".module-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === view));
+      $$(".module-tab").forEach((tab) => {
+        const isActive = tab.dataset.view === view;
+        tab.classList.toggle("active", isActive);
+        tab.setAttribute("aria-selected", String(isActive));
+      });
       $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
       window.scrollTo({ top: 0, behavior: "smooth" });
     });

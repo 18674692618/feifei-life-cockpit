@@ -1,19 +1,21 @@
 :root {
-  --bg: #f2efe8;
-  --paper: #fffdf8;
-  --paper-2: #f8f4ec;
-  --ink: #222522;
-  --muted: #6f756f;
-  --line: #ddd5ca;
-  --green: #2f765e;
-  --green-2: #e4f1ea;
-  --blue: #2f6f91;
-  --blue-2: #e3edf3;
-  --gold: #c48a2c;
-  --gold-2: #f5ead4;
-  --red: #b9574c;
-  --red-2: #f5e4df;
-  --shadow: 0 20px 60px rgba(51, 42, 31, 0.12);
+  --bg: #f7fbf4;
+  --paper: #ffffff;
+  --paper-2: #f7faf4;
+  --ink: #121512;
+  --muted: #72766f;
+  --line: #e9eee3;
+  --green: #55c66d;
+  --green-deep: #1f9f54;
+  --green-2: #edfbe9;
+  --mint: #dff8d8;
+  --blue: #5f91d8;
+  --blue-2: #eef5ff;
+  --gold: #d1a54c;
+  --gold-2: #fff8dc;
+  --red: #df6d61;
+  --red-2: #fff0ed;
+  --shadow: 0 14px 42px rgba(34, 82, 41, 0.08);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
@@ -22,7 +24,9 @@
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(164, 255, 126, 0.28), transparent 34%),
+    linear-gradient(180deg, #fbfff7 0%, var(--bg) 34%, #ffffff 100%);
   color: var(--ink);
   margin: 0;
 }
@@ -42,19 +46,37 @@ button {
   margin: 0 auto;
   max-width: 1480px;
   min-height: 100vh;
-  padding: 24px clamp(14px, 4vw, 48px) 56px;
+  padding: 22px clamp(14px, 4vw, 48px) 56px;
 }
 
 .app-header {
   align-items: flex-start;
+  background: linear-gradient(135deg, rgba(231, 255, 218, 0.96), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(218, 238, 210, 0.96);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
   display: flex;
   gap: 20px;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  padding: 22px;
+  position: relative;
+}
+
+.app-header::after {
+  background: rgba(85, 198, 109, 0.18);
+  border-radius: 999px;
+  content: "";
+  height: 170px;
+  position: absolute;
+  right: 82px;
+  top: -88px;
+  width: 170px;
 }
 
 .eyebrow {
-  color: var(--green);
+  color: var(--green-deep);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0;
@@ -70,7 +92,7 @@ p {
 }
 
 h1 {
-  font-size: clamp(30px, 5vw, 54px);
+  font-size: clamp(32px, 5vw, 56px);
   letter-spacing: 0;
   line-height: 1.05;
   margin-bottom: 10px;
@@ -98,19 +120,23 @@ h3 {
 .button-row {
   display: flex;
   gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .icon-button {
   align-items: center;
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(221, 235, 215, 0.95);
   border-radius: 8px;
   color: var(--ink);
   display: inline-flex;
   font-weight: 900;
   height: 44px;
   justify-content: center;
+  position: relative;
   width: 44px;
+  z-index: 1;
 }
 
 .icon-button.small {
@@ -120,9 +146,11 @@ h3 {
 }
 
 .module-tabs {
-  background: rgba(255, 253, 248, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--line);
   border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(36, 97, 44, 0.06);
+  backdrop-filter: blur(16px);
   display: grid;
   gap: 6px;
   grid-template-columns: repeat(4, 1fr);
@@ -134,16 +162,22 @@ h3 {
 }
 
 .module-tab {
-  background: transparent;
+  background: transparent !important;
   border: 0;
   border-radius: 7px;
   color: var(--muted);
   font-weight: 900;
   min-height: 42px;
+  transition: color 0.18s ease, transform 0.18s ease;
 }
 
-.module-tab.active {
-  background: var(--green);
+.module-tab:active {
+  transform: scale(0.98);
+}
+
+.module-tab.active,
+.module-tab[aria-selected="true"] {
+  background: var(--green) !important;
   color: white;
 }
 
@@ -180,19 +214,62 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.hero-card,
+.panel {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hero-card:hover,
+.panel:hover {
+  box-shadow: 0 18px 46px rgba(34, 82, 41, 0.1);
+}
+
 .hero-card {
-  min-height: 220px;
+  min-height: 214px;
   padding: 24px;
+  position: relative;
+}
+
+.hero-card:not(.asset-hero)::before {
+  background: var(--mint);
+  border-radius: 999px;
+  content: "";
+  height: 58px;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 58px;
+  z-index: 0;
+}
+
+.hero-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .asset-hero {
-  background: #21332d;
+  background:
+    linear-gradient(135deg, rgba(18, 21, 18, 0.96), rgba(31, 159, 84, 0.9)),
+    #121512;
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.asset-hero::after {
+  background: rgba(201, 255, 166, 0.2);
+  border-radius: 999px;
+  bottom: -72px;
+  content: "";
+  height: 170px;
+  position: absolute;
+  right: -58px;
+  width: 170px;
 }
 
 .asset-hero .eyebrow,
 .asset-hero .hero-meta {
-  color: #a8d8c2;
+  color: #c9ffa6;
 }
 
 .hero-number {
@@ -211,7 +288,7 @@ h3 {
 }
 
 .mini-progress {
-  background: var(--paper-2);
+  background: #eef5e8;
   border-radius: 999px;
   height: 12px;
   margin-top: 28px;
@@ -219,7 +296,7 @@ h3 {
 }
 
 .mini-progress span {
-  background: var(--gold);
+  background: var(--green);
   display: block;
   height: 100%;
   width: 0%;
@@ -287,7 +364,7 @@ input,
 textarea,
 select {
   background: white;
-  border: 1px solid #d7cec2;
+  border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
   outline: 0;
@@ -297,6 +374,15 @@ input,
 select {
   min-height: 42px;
   padding: 0 12px;
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px;
+  padding-right: 34px;
 }
 
 textarea {
@@ -309,7 +395,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(47, 118, 94, 0.16);
+  box-shadow: 0 0 0 3px rgba(85, 198, 109, 0.16);
 }
 
 .primary-button,
@@ -318,24 +404,32 @@ select:focus {
   font-weight: 900;
   min-height: 44px;
   padding: 0 15px;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.primary-button:active,
+.secondary-button:active,
+.icon-button:active,
+.calendar-cell:active {
+  transform: scale(0.98);
 }
 
 .primary-button {
-  background: var(--green);
-  border: 1px solid var(--green);
+  background: var(--ink);
+  border: 1px solid var(--ink);
   color: white;
 }
 
 .secondary-button {
   background: transparent;
   border: 1px solid var(--line);
-  color: var(--muted);
+  color: var(--ink);
 }
 
 .text-button {
   background: transparent;
   border: 0;
-  color: var(--green);
+  color: var(--green-deep);
   font-weight: 900;
   padding: 4px 0;
 }
@@ -347,6 +441,19 @@ select:focus {
 .metric-card {
   box-shadow: none;
   padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::after {
+  background: var(--green-2);
+  border-radius: 999px;
+  content: "";
+  height: 42px;
+  position: absolute;
+  right: -12px;
+  top: -16px;
+  width: 42px;
 }
 
 .metric-card span {
@@ -379,7 +486,7 @@ select:focus {
 .asset-bar,
 .change-card {
   background: var(--paper-2);
-  border: 1px solid rgba(221, 213, 202, 0.75);
+  border: 1px solid rgba(229, 238, 223, 0.95);
   border-radius: 8px;
   padding: 14px;
 }
@@ -395,7 +502,7 @@ select:focus {
   align-items: center;
   background: var(--green-2);
   border-radius: 8px;
-  color: var(--green);
+  color: var(--green-deep);
   display: flex;
   font-weight: 900;
   height: 42px;
@@ -427,7 +534,7 @@ select:focus {
 .calendar-hint {
   background: var(--green-2);
   border-radius: 8px;
-  color: var(--green);
+  color: var(--green-deep);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.5;
@@ -451,8 +558,8 @@ select:focus {
 
 .calendar-cell {
   aspect-ratio: 1;
-  background: #fbf8f2;
-  border: 1px solid rgba(221, 213, 202, 0.95);
+  background: #ffffff;
+  border: 1px solid rgba(229, 238, 223, 0.95);
   border-radius: 8px;
   color: var(--ink);
   display: grid;
@@ -461,6 +568,7 @@ select:focus {
   padding: 8px;
   position: relative;
   text-align: left;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .calendar-cell.empty {
@@ -469,12 +577,12 @@ select:focus {
 }
 
 .calendar-cell.trained {
-  background: var(--green-2);
-  border-color: rgba(47, 118, 94, 0.28);
+  background: linear-gradient(180deg, #f3ffed, #e4fbde);
+  border-color: rgba(85, 198, 109, 0.48);
 }
 
 .calendar-cell:not(.trained):hover {
-  background: #f3efe7;
+  background: #f7fbf4;
   border-color: var(--green);
 }
 
@@ -484,7 +592,7 @@ select:focus {
 }
 
 .calendar-cell.selected {
-  background: var(--green);
+  background: var(--ink);
   color: white;
 }
 
@@ -520,7 +628,7 @@ select:focus {
 }
 
 .calendar-cell i {
-  background: currentColor;
+  background: var(--green-deep);
   border-radius: 999px;
   bottom: 8px;
   height: 5px;
@@ -539,7 +647,7 @@ select:focus {
 }
 
 .bar-track {
-  background: #e6ded3;
+  background: #edf2e9;
   border-radius: 999px;
   height: 11px;
   overflow: hidden;
@@ -562,7 +670,7 @@ select:focus {
 }
 
 .photo-drop {
-  border: 1px dashed #b9ad9d;
+  border: 1px dashed #c8dfbf;
   border-radius: 8px;
   cursor: pointer;
   padding: 14px;
@@ -611,7 +719,7 @@ select:focus {
 
 .trip-body {
   background: var(--paper-2);
-  border: 1px solid rgba(221, 213, 202, 0.75);
+  border: 1px solid rgba(229, 238, 223, 0.95);
   border-radius: 8px;
   padding: 16px;
 }
@@ -628,7 +736,7 @@ select:focus {
 }
 
 .trip-cost {
-  color: var(--blue);
+  color: var(--green-deep);
   font-size: 22px;
   font-weight: 900;
   white-space: nowrap;
@@ -655,7 +763,7 @@ select:focus {
 }
 
 .toast {
-  background: #202622;
+  background: var(--ink);
   border-radius: 8px;
   bottom: 24px;
   color: white;
@@ -706,15 +814,39 @@ body.hide-money .money-text::after {
 
 @media (max-width: 640px) {
   .app-shell {
-    padding-inline: 12px;
+    padding: 12px 10px 40px;
   }
 
   .app-header {
     display: grid;
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .header-copy {
+    font-size: 14px;
   }
 
   .module-tabs {
-    grid-template-columns: repeat(2, 1fr);
+    bottom: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    margin-bottom: 18px;
+    position: sticky;
+    top: auto;
+  }
+
+  .module-tab {
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .module-tab.active,
+  .module-tab[aria-selected="true"] {
+    background: var(--green) !important;
+    color: white;
   }
 
   .field-grid,
