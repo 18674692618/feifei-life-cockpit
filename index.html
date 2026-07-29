@@ -22,6 +22,7 @@
         </div>
         <div class="header-actions">
           <button class="icon-button" id="installBtn" type="button" title="安装到桌面" aria-label="安装到桌面" hidden>＋</button>
+          <button class="icon-button" id="cloudBtn" type="button" title="云端同步" aria-label="云端同步">☁</button>
           <button class="icon-button" id="privacyBtn" type="button" title="隐藏金额" aria-label="隐藏金额">◐</button>
           <button class="icon-button" id="exportBtn" type="button" title="导出数据" aria-label="导出数据">↓</button>
           <label class="icon-button" title="导入数据" aria-label="导入数据">
@@ -113,6 +114,24 @@
                 </div>
               </div>
               <div class="signal-list" id="signalList"></div>
+            </article>
+
+            <article class="panel sync-panel" id="cloudSyncPanel">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">Cloud</p>
+                  <h2>云端保存</h2>
+                </div>
+              </div>
+              <div class="stack-form">
+                <label>同步地址<input id="cloudSyncUrl" type="url" placeholder="Google 同步地址" /></label>
+                <div class="sync-actions">
+                  <button class="primary-button" id="saveCloudUrlBtn" type="button">保存地址</button>
+                  <button class="secondary-button" id="uploadCloudBtn" type="button">上传</button>
+                  <button class="secondary-button" id="restoreCloudBtn" type="button">恢复</button>
+                </div>
+                <div class="muted" id="cloudSyncStatus">未配置</div>
+              </div>
             </article>
           </section>
         </section>

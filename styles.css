@@ -290,6 +290,10 @@ h3 {
   grid-template-columns: 1fr 1fr;
 }
 
+.sync-panel {
+  grid-column: 1 / -1;
+}
+
 .hero-card,
 .panel,
 .metric-card {
@@ -516,6 +520,12 @@ select:focus {
   background: transparent;
   border: 1px solid var(--line);
   color: var(--ink);
+}
+
+.sync-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1.2fr 1fr 1fr;
 }
 
 .text-button {

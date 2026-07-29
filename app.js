@@ -1,6 +1,7 @@
 const STORAGE_KEY = "feifei-life-cockpit-v1";
 const STORAGE_BACKUP_KEY = "feifei-life-cockpit-backup-v1";
 const STORAGE_MIRROR_KEY = "feifei-life-cockpit-data";
+const CLOUD_SYNC_URL_KEY = "feifei-life-cockpit-cloud-url";
 const oldTripKey = "feifei-travel-world-v1";
 
 const today = new Date();
@@ -68,6 +69,7 @@ let pendingPhotos = [];
 let selectedWorkoutMonth = currentMonth;
 let selectedWorkoutDate = todayISO;
 let deferredInstallPrompt = null;
+let cloudSyncTimer = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -219,6 +221,7 @@ function dedupeDateRecords(records) {
 function saveState() {
   try {
     persistState(state);
+    scheduleCloudSync();
   } catch {
     toast("保存失败，请先导出数据备份");
   }
@@ -249,12 +252,7 @@ function bindNavigation() {
   $$(".module-tab").forEach((button) => {
     button.addEventListener("click", () => {
       const view = button.dataset.view;
-      $$(".module-tab").forEach((tab) => {
-        const isActive = tab.dataset.view === view;
-        tab.classList.toggle("active", isActive);
-        tab.setAttribute("aria-selected", String(isActive));
-      });
-      $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+      showView(view);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
@@ -368,6 +366,34 @@ function bindTravel() {
 }
 
 function bindDataTools() {
+  $("#cloudSyncUrl").value = localStorage.getItem(CLOUD_SYNC_URL_KEY) || "";
+  updateCloudStatus();
+
+  $("#cloudBtn").addEventListener("click", () => {
+    showView("dashboard");
+    $("#cloudSyncPanel").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  $("#saveCloudUrlBtn").addEventListener("click", () => {
+    const url = $("#cloudSyncUrl").value.trim();
+    if (url) {
+      localStorage.setItem(CLOUD_SYNC_URL_KEY, url);
+      toast("同步地址已保存");
+      syncToCloud(true);
+    } else {
+      localStorage.removeItem(CLOUD_SYNC_URL_KEY);
+      updateCloudStatus("未配置");
+      toast("已关闭云端同步");
+    }
+  });
+
+  $("#uploadCloudBtn").addEventListener("click", () => syncToCloud(true));
+
+  $("#restoreCloudBtn").addEventListener("click", async () => {
+    if (!confirm("用云端数据覆盖本机数据吗？")) return;
+    await restoreFromCloud();
+  });
+
   $("#privacyBtn").addEventListener("click", () => {
     document.body.classList.toggle("hide-money");
   });
@@ -396,6 +422,128 @@ function bindDataTools() {
     } finally {
       event.target.value = "";
     }
+  });
+}
+
+function showView(view) {
+  $$(".module-tab").forEach((tab) => {
+    const isActive = tab.dataset.view === view;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+  $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+}
+
+function scheduleCloudSync() {
+  const url = localStorage.getItem(CLOUD_SYNC_URL_KEY);
+  if (!url) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => syncToCloud(false), 900);
+}
+
+async function syncToCloud(showToast) {
+  const url = localStorage.getItem(CLOUD_SYNC_URL_KEY);
+  if (!url) {
+    updateCloudStatus("未配置");
+    if (showToast) toast("先填写同步地址");
+    return;
+  }
+
+  updateCloudStatus("同步中...");
+  try {
+    const payload = {
+      savedAt: new Date().toISOString(),
+      state: normalizeState(structuredClone(state))
+    };
+    await postCloudPayload(url, payload);
+    updateCloudStatus(`已同步 ${formatTime(new Date())}`);
+    if (showToast) toast("已上传云端");
+  } catch {
+    updateCloudStatus("同步失败");
+    if (showToast) toast("云端同步失败");
+  }
+}
+
+async function restoreFromCloud() {
+  const url = localStorage.getItem(CLOUD_SYNC_URL_KEY);
+  if (!url) {
+    toast("先填写同步地址");
+    return;
+  }
+
+  updateCloudStatus("恢复中...");
+  try {
+    const data = await fetchCloudPayload(url);
+    state = normalizeState(data.state || data);
+    saveState();
+    renderAll();
+    updateCloudStatus(`已恢复 ${formatTime(new Date())}`);
+    toast("已从云端恢复");
+  } catch {
+    updateCloudStatus("恢复失败");
+    toast("云端恢复失败");
+  }
+}
+
+function updateCloudStatus(text) {
+  const el = $("#cloudSyncStatus");
+  if (!el) return;
+  const url = localStorage.getItem(CLOUD_SYNC_URL_KEY);
+  el.textContent = text || (url ? "已配置" : "未配置");
+}
+
+async function postCloudPayload(url, payload) {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error("cloud post failed");
+  } catch {
+    await fetch(url, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(payload)
+    });
+  }
+}
+
+async function fetchCloudPayload(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("cloud fetch failed");
+    return response.json();
+  } catch {
+    return fetchCloudJsonp(url);
+  }
+}
+
+function fetchCloudJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `feifeiCloud${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const script = document.createElement("script");
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("cloud jsonp timeout"));
+    }, 12000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      script.remove();
+      delete window[callbackName];
+    }
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("cloud jsonp failed"));
+    };
+    script.src = `${url}${url.includes("?") ? "&" : "?"}callback=${callbackName}`;
+    document.body.appendChild(script);
   });
 }
 
@@ -907,6 +1055,10 @@ function formatMonthTitle(month) {
 
 function formatMonthDay(date) {
   return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit" }).format(new Date(date));
+}
+
+function formatTime(date) {
+  return new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
 function shiftDate(days) {
