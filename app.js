@@ -7,7 +7,7 @@ const oldTripKey = "feifei-travel-world-v1";
 const today = new Date();
 const currentMonth = today.toISOString().slice(0, 7);
 const todayISO = today.toISOString().slice(0, 10);
-const APP_VERSION = "v22";
+const APP_VERSION = "v23";
 
 const defaultState = {
   workouts: [
@@ -189,6 +189,7 @@ function normalizeBirthdays(birthdays) {
       id: item.id || uid(),
       name: String(item.name).trim(),
       relation: String(item.relation || "").trim(),
+      calendar: item.calendar === "lunar" ? "lunar" : "solar",
       date: item.date,
       note: String(item.note || "").trim()
     }));
@@ -398,6 +399,7 @@ function bindBirthdays() {
       id: id || uid(),
       name: $("#birthdayName").value.trim(),
       relation: $("#birthdayRelation").value.trim(),
+      calendar: $("#birthdayCalendar").value,
       date: $("#birthdayDate").value,
       note: $("#birthdayNote").value.trim()
     };
@@ -435,6 +437,9 @@ function bindBirthdays() {
   });
   $$("[data-relation-value]").forEach((button) => {
     button.addEventListener("click", () => setBirthdayRelation(button.dataset.relationValue));
+  });
+  $$("[data-calendar-value]").forEach((button) => {
+    button.addEventListener("click", () => setBirthdayCalendar(button.dataset.calendarValue));
   });
 }
 
@@ -722,7 +727,7 @@ function renderBirthdays() {
             <div class="birthday-top">
               <div>
                 <h3>${escapeHtml(item.name)} <span>${escapeHtml(item.relation || "家人")}</span></h3>
-                <div class="muted">公历：${formatBirthdayMonthDay(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
+                <div class="muted">${birthdayCalendarLabel(item.calendar)}：${formatBirthdayMonthDay(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
               </div>
               <div class="birthday-countdown"><strong>${nextInfo.daysLeft === 0 ? "今天" : nextInfo.daysLeft}</strong><span>${nextInfo.daysLeft === 0 ? "生日" : "天后"}</span></div>
             </div>
@@ -1116,6 +1121,7 @@ function editBirthday(id) {
   $("#birthdayNote").value = birthday.note || "";
   $("#birthdayFormTitle").textContent = "编辑生日";
   setBirthdayRelation(birthday.relation || "家人");
+  setBirthdayCalendar(birthday.calendar || "solar");
   openBirthdayEditor();
   $("#birthdayName").focus();
 }
@@ -1141,6 +1147,7 @@ function resetBirthdayForm() {
   $("#birthdayId").value = "";
   $("#birthdayFormTitle").textContent = "新增生日";
   setBirthdayRelation("家人");
+  setBirthdayCalendar("solar");
 }
 
 function openBirthdayEditor() {
@@ -1213,6 +1220,14 @@ function setBirthdayRelation(relation) {
   });
 }
 
+function setBirthdayCalendar(calendar) {
+  const value = calendar === "lunar" ? "lunar" : "solar";
+  $("#birthdayCalendar").value = value;
+  $$("[data-calendar-value]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.calendarValue === value);
+  });
+}
+
 function nextBirthdayInfo(dateString) {
   const [, month, day] = dateString.split("-").map(Number);
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -1231,6 +1246,10 @@ function birthdayAge(dateString, nextDate) {
 function formatBirthdayMonthDay(dateString) {
   const [, month, day] = dateString.split("-").map(Number);
   return `${month}月${day}日`;
+}
+
+function birthdayCalendarLabel(calendar) {
+  return calendar === "lunar" ? "阴历" : "阳历";
 }
 
 function formatSigned(value) {
