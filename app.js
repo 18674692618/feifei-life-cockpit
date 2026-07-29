@@ -2,13 +2,12 @@ const STORAGE_KEY = "feifei-life-cockpit-v1";
 const STORAGE_BACKUP_KEY = "feifei-life-cockpit-backup-v1";
 const STORAGE_MIRROR_KEY = "feifei-life-cockpit-data";
 const CLOUD_SYNC_URL_KEY = "feifei-life-cockpit-cloud-url";
-const BIRTHDAY_FAB_POSITION_KEY = "feifei-birthday-fab-position";
 const oldTripKey = "feifei-travel-world-v1";
 
 const today = new Date();
 const currentMonth = today.toISOString().slice(0, 7);
 const todayISO = today.toISOString().slice(0, 10);
-const APP_VERSION = "v21";
+const APP_VERSION = "v22";
 
 const defaultState = {
   workouts: [
@@ -72,7 +71,6 @@ let pendingPhotos = [];
 let selectedWorkoutMonth = currentMonth;
 let selectedWorkoutDate = todayISO;
 let selectedBirthdayFilter = "all";
-let birthdayFabWasDragged = false;
 let deferredInstallPrompt = null;
 let cloudSyncTimer = null;
 
@@ -414,10 +412,6 @@ function bindBirthdays() {
   });
 
   $("#newBirthdayBtn").addEventListener("click", () => {
-    if (birthdayFabWasDragged) {
-      birthdayFabWasDragged = false;
-      return;
-    }
     resetBirthdayForm();
     openBirthdayEditor();
   });
@@ -442,7 +436,6 @@ function bindBirthdays() {
   $$("[data-relation-value]").forEach((button) => {
     button.addEventListener("click", () => setBirthdayRelation(button.dataset.relationValue));
   });
-  makeBirthdayFabDraggable();
 }
 
 function bindDataTools() {
@@ -1172,66 +1165,6 @@ function closeCloudSyncPanel() {
   const panel = $("#cloudSyncPanel");
   panel.classList.add("is-collapsed");
   panel.setAttribute("aria-hidden", "true");
-}
-
-function makeBirthdayFabDraggable() {
-  const button = $("#newBirthdayBtn");
-  const saved = readFabPosition();
-  if (saved) setFabPosition(button, saved.x, saved.y);
-
-  let startX = 0;
-  let startY = 0;
-  let currentX = saved?.x || 0;
-  let currentY = saved?.y || 0;
-  let pointerId = null;
-  let dragging = false;
-
-  button.addEventListener("pointerdown", (event) => {
-    pointerId = event.pointerId;
-    startX = event.clientX - currentX;
-    startY = event.clientY - currentY;
-    dragging = false;
-    button.setPointerCapture(pointerId);
-  });
-
-  button.addEventListener("pointermove", (event) => {
-    if (pointerId !== event.pointerId) return;
-    const nextX = event.clientX - startX;
-    const nextY = event.clientY - startY;
-    if (Math.abs(nextX - currentX) + Math.abs(nextY - currentY) > 8) dragging = true;
-    currentX = clamp(nextX, 8, window.innerWidth - button.offsetWidth - 8);
-    currentY = clamp(nextY, 8, window.innerHeight - button.offsetHeight - 88);
-    setFabPosition(button, currentX, currentY);
-  });
-
-  button.addEventListener("pointerup", (event) => {
-    if (pointerId !== event.pointerId) return;
-    button.releasePointerCapture(pointerId);
-    pointerId = null;
-    if (dragging) {
-      birthdayFabWasDragged = true;
-      localStorage.setItem(BIRTHDAY_FAB_POSITION_KEY, JSON.stringify({ x: currentX, y: currentY }));
-    }
-  });
-}
-
-function readFabPosition() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(BIRTHDAY_FAB_POSITION_KEY) || "null");
-    return Number.isFinite(parsed?.x) && Number.isFinite(parsed?.y) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function setFabPosition(button, x, y) {
-  button.style.left = `${x}px`;
-  button.style.top = `${y}px`;
-  button.classList.add("is-positioned");
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
 }
 
 function renderPhotoPreview() {

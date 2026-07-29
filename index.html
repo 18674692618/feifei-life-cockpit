@@ -73,16 +73,18 @@
                 <button class="birthday-filter" type="button" data-birthday-filter="同学">同学 <span data-birthday-count="同学">0</span></button>
                 <button class="birthday-filter" type="button" data-birthday-filter="亲戚">亲戚 <span data-birthday-count="亲戚">0</span></button>
               </div>
-              <label class="birthday-search">
-                <span>⌕</span>
-                <input id="birthdaySearch" type="search" placeholder="输入姓名搜索..." />
-              </label>
+              <div class="birthday-search-row">
+                <label class="birthday-search">
+                  <span>⌕</span>
+                  <input id="birthdaySearch" type="search" placeholder="输入姓名搜索..." />
+                </label>
+                <button class="birthday-add-button" id="newBirthdayBtn" type="button" aria-label="新增生日">＋</button>
+              </div>
               <div class="birthday-summary-strip">
                 <div><span>本月生日</span><strong id="birthdayMonthCount">0</strong></div>
                 <div><span>最近生日</span><strong id="birthdayNextName">暂无</strong></div>
               </div>
               <div class="birthday-list" id="birthdayList"></div>
-              <button class="birthday-fab" id="newBirthdayBtn" type="button" aria-label="新增生日">＋</button>
             </article>
 
             <div class="birthday-modal is-collapsed" id="birthdayEditor" aria-hidden="true">
