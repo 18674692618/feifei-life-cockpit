@@ -724,8 +724,16 @@ select:focus {
 }
 
 .birthday-card {
+  border: 1px solid rgba(238, 224, 190, 0.76);
+  color: var(--ink);
   display: grid;
   gap: 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.birthday-card:active {
+  transform: scale(0.99);
 }
 
 .birthday-body {
@@ -786,41 +794,50 @@ select:focus {
   font-weight: 900;
 }
 
-.birthday-actions {
-  display: flex;
-  gap: 10px;
-  white-space: nowrap;
-}
-
-.birthday-note {
-  color: var(--ink);
-  margin-top: 10px;
-  overflow-wrap: anywhere;
-}
-
 .birthday-fab {
   align-items: center;
   background: #d8755d;
   border: 0;
   border-radius: 999px;
-  bottom: 16px;
+  bottom: 92px;
   box-shadow: 0 12px 26px rgba(216, 117, 93, 0.28);
   color: white;
   display: flex;
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 900;
-  height: 58px;
+  height: 46px;
   justify-content: center;
   line-height: 1;
-  position: sticky;
-  justify-self: end;
-  margin-top: -68px;
-  width: 58px;
+  position: fixed;
+  right: 24px;
+  touch-action: none;
+  width: 46px;
   z-index: 4;
+}
+
+.birthday-fab.is-positioned {
+  bottom: auto;
+  right: auto;
+}
+
+.birthday-modal {
+  align-items: end;
+  background: rgba(18, 21, 18, 0.36);
+  backdrop-filter: blur(12px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 18px;
+  position: fixed;
+  z-index: 80;
 }
 
 .birthday-editor {
   background: rgba(255, 250, 244, 0.84);
+  max-height: min(82vh, 720px);
+  max-width: 560px;
+  overflow-y: auto;
+  width: 100%;
 }
 
 .profile-field {
@@ -1476,14 +1493,14 @@ body.hide-money .money-text::after {
   }
 
   .birthday-fab {
-    bottom: 88px;
-    height: 54px;
-    margin-top: -62px;
-    width: 54px;
+    bottom: 86px;
+    height: 44px;
+    right: 22px;
+    width: 44px;
   }
 
-  .birthday-actions {
-    gap: 14px;
+  .birthday-modal {
+    padding: 10px;
   }
 
   .profile-field {

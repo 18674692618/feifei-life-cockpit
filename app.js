@@ -2,12 +2,13 @@ const STORAGE_KEY = "feifei-life-cockpit-v1";
 const STORAGE_BACKUP_KEY = "feifei-life-cockpit-backup-v1";
 const STORAGE_MIRROR_KEY = "feifei-life-cockpit-data";
 const CLOUD_SYNC_URL_KEY = "feifei-life-cockpit-cloud-url";
+const BIRTHDAY_FAB_POSITION_KEY = "feifei-birthday-fab-position";
 const oldTripKey = "feifei-travel-world-v1";
 
 const today = new Date();
 const currentMonth = today.toISOString().slice(0, 7);
 const todayISO = today.toISOString().slice(0, 10);
-const APP_VERSION = "v19";
+const APP_VERSION = "v20";
 
 const defaultState = {
   workouts: [
@@ -71,6 +72,7 @@ let pendingPhotos = [];
 let selectedWorkoutMonth = currentMonth;
 let selectedWorkoutDate = todayISO;
 let selectedBirthdayFilter = "all";
+let birthdayFabWasDragged = false;
 let deferredInstallPrompt = null;
 let cloudSyncTimer = null;
 
@@ -412,12 +414,22 @@ function bindBirthdays() {
   });
 
   $("#newBirthdayBtn").addEventListener("click", () => {
+    if (birthdayFabWasDragged) {
+      birthdayFabWasDragged = false;
+      return;
+    }
     resetBirthdayForm();
     openBirthdayEditor();
   });
   $("#cancelBirthdayBtn").addEventListener("click", () => {
     resetBirthdayForm();
     closeBirthdayEditor();
+  });
+  $("#birthdayEditor").addEventListener("click", (event) => {
+    if (event.target.id === "birthdayEditor") {
+      resetBirthdayForm();
+      closeBirthdayEditor();
+    }
   });
   $("#birthdaySearch").addEventListener("input", renderBirthdays);
   $("[data-birthday-filter='all']").classList.add("active");
@@ -430,6 +442,7 @@ function bindBirthdays() {
   $$("[data-relation-value]").forEach((button) => {
     button.addEventListener("click", () => setBirthdayRelation(button.dataset.relationValue));
   });
+  makeBirthdayFabDraggable();
 }
 
 function bindDataTools() {
@@ -707,31 +720,25 @@ function renderBirthdays() {
       const nextInfo = nextBirthdayInfo(item.date);
       const age = birthdayAge(item.date, nextInfo.nextDate);
       return `
-        <article class="birthday-card">
+        <button class="birthday-card" type="button" data-open-birthday="${item.id}" aria-label="编辑 ${escapeHtml(item.name)} 的生日">
           <div class="birthday-body">
             <div class="birthday-top">
               <div>
                 <h3>${escapeHtml(item.name)} <span>${escapeHtml(item.relation || "家人")}</span></h3>
-                <div class="muted">公历：${formatDate(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
+                <div class="muted">公历：${formatBirthdayMonthDay(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
               </div>
               <div class="birthday-countdown"><strong>${nextInfo.daysLeft === 0 ? "今天" : nextInfo.daysLeft}</strong><span>${nextInfo.daysLeft === 0 ? "生日" : "天后"}</span></div>
             </div>
             <div class="birthday-card-bottom">
               <span>${formatBirthdayMonthDay(item.date)}</span>
-              <div class="birthday-actions">
-                <button class="text-button" type="button" data-edit-birthday="${item.id}">编辑</button>
-                <button class="text-button danger" type="button" data-delete-birthday="${item.id}">删除</button>
-              </div>
             </div>
-            ${item.note ? `<div class="birthday-note">${escapeHtml(item.note)}</div>` : ""}
           </div>
-        </article>
+        </button>
       `;
     })
     .join("") || `<div class="muted">还没有生日记录。</div>`;
 
-  $$("[data-edit-birthday]").forEach((button) => button.addEventListener("click", () => editBirthday(button.dataset.editBirthday)));
-  $$("[data-delete-birthday]").forEach((button) => button.addEventListener("click", () => deleteBirthday(button.dataset.deleteBirthday)));
+  $$("[data-open-birthday]").forEach((button) => button.addEventListener("click", () => editBirthday(button.dataset.openBirthday)));
 }
 
 function renderFitness() {
@@ -1143,12 +1150,75 @@ function resetBirthdayForm() {
 }
 
 function openBirthdayEditor() {
-  $("#birthdayEditor").classList.remove("is-collapsed");
-  $("#birthdayEditor").scrollIntoView({ behavior: "smooth", block: "start" });
+  const editor = $("#birthdayEditor");
+  editor.classList.remove("is-collapsed");
+  editor.setAttribute("aria-hidden", "false");
 }
 
 function closeBirthdayEditor() {
-  $("#birthdayEditor").classList.add("is-collapsed");
+  const editor = $("#birthdayEditor");
+  editor.classList.add("is-collapsed");
+  editor.setAttribute("aria-hidden", "true");
+}
+
+function makeBirthdayFabDraggable() {
+  const button = $("#newBirthdayBtn");
+  const saved = readFabPosition();
+  if (saved) setFabPosition(button, saved.x, saved.y);
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = saved?.x || 0;
+  let currentY = saved?.y || 0;
+  let pointerId = null;
+  let dragging = false;
+
+  button.addEventListener("pointerdown", (event) => {
+    pointerId = event.pointerId;
+    startX = event.clientX - currentX;
+    startY = event.clientY - currentY;
+    dragging = false;
+    button.setPointerCapture(pointerId);
+  });
+
+  button.addEventListener("pointermove", (event) => {
+    if (pointerId !== event.pointerId) return;
+    const nextX = event.clientX - startX;
+    const nextY = event.clientY - startY;
+    if (Math.abs(nextX - currentX) + Math.abs(nextY - currentY) > 8) dragging = true;
+    currentX = clamp(nextX, 8, window.innerWidth - button.offsetWidth - 8);
+    currentY = clamp(nextY, 8, window.innerHeight - button.offsetHeight - 88);
+    setFabPosition(button, currentX, currentY);
+  });
+
+  button.addEventListener("pointerup", (event) => {
+    if (pointerId !== event.pointerId) return;
+    button.releasePointerCapture(pointerId);
+    pointerId = null;
+    if (dragging) {
+      birthdayFabWasDragged = true;
+      localStorage.setItem(BIRTHDAY_FAB_POSITION_KEY, JSON.stringify({ x: currentX, y: currentY }));
+    }
+  });
+}
+
+function readFabPosition() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(BIRTHDAY_FAB_POSITION_KEY) || "null");
+    return Number.isFinite(parsed?.x) && Number.isFinite(parsed?.y) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function setFabPosition(button, x, y) {
+  button.style.left = `${x}px`;
+  button.style.top = `${y}px`;
+  button.classList.add("is-positioned");
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function renderPhotoPreview() {
