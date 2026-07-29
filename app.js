@@ -75,6 +75,12 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 const money = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
+const viewTitles = {
+  fitness: { title: "健身", copy: "记录每月运动和爱爱" },
+  assets: { title: "资产", copy: "家庭收入、支出和余额" },
+  travel: { title: "旅行", copy: "费用、攻略和回忆" },
+  dashboard: { title: "总览", copy: "飞飞子的生活工作台" }
+};
 
 init();
 
@@ -432,6 +438,13 @@ function showView(view) {
     tab.setAttribute("aria-selected", String(isActive));
   });
   $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+  updateHeaderTitle(view);
+}
+
+function updateHeaderTitle(view) {
+  const header = viewTitles[view] || viewTitles.dashboard;
+  $("#appHeaderTitle").textContent = header.title;
+  $("#appHeaderCopy").textContent = header.copy;
 }
 
 function scheduleCloudSync() {
@@ -650,7 +663,7 @@ function renderFitness() {
   $("#fitMonthDays").textContent = uniqueWorkoutDays(monthWorkouts);
   $("#fitWeekCount").textContent = uniqueWorkoutDays(week);
   $("#fitLoveCount").textContent = uniqueDateRecords(monthLoveDays);
-  $("#fitnessMonthTitle").textContent = `${formatMonthTitle(selectedWorkoutMonth)} 训练日历`;
+  $("#fitnessMonthTitle").textContent = formatMonthTitle(selectedWorkoutMonth);
   renderSelectedDayControls();
   renderFitnessCalendar();
   renderSelectedWorkoutList();

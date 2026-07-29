@@ -627,6 +627,23 @@ select:focus {
 .calendar-actions {
   display: flex;
   gap: 6px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.calendar-title-row {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.calendar-title-row > div:first-child {
+  min-width: 0;
+}
+
+.calendar-title-row h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .selected-day-toolbar {
@@ -1188,10 +1205,10 @@ body.hide-money .money-text::after {
   }
 
   .fitness-panel .panel-title {
-    align-items: end;
-    display: grid;
+    align-items: center;
+    display: flex;
     gap: 8px;
-    grid-template-columns: minmax(0, 1fr) auto;
+    justify-content: space-between;
   }
 
   .fitness-panel .eyebrow {
@@ -1200,7 +1217,7 @@ body.hide-money .money-text::after {
   }
 
   .fitness-panel .panel-title h3 {
-    font-size: 22px;
+    font-size: 21px;
     line-height: 1.12;
   }
 
