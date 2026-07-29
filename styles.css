@@ -574,6 +574,7 @@ select:focus {
 
 .focus-list,
 .signal-list,
+.birthday-list,
 .log-list,
 .timeline,
 .asset-bars,
@@ -584,6 +585,7 @@ select:focus {
 
 .focus-item,
 .signal-item,
+.birthday-card,
 .log-item,
 .asset-bar,
 .change-card {
@@ -618,6 +620,60 @@ select:focus {
   display: flex;
   gap: 14px;
   justify-content: space-between;
+}
+
+.birthday-card {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 82px minmax(0, 1fr);
+}
+
+.birthday-date {
+  align-content: center;
+  background: var(--green-2);
+  border: 1px solid rgba(255, 201, 40, 0.44);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-height: 72px;
+}
+
+.birthday-date span {
+  color: var(--green-deep);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.birthday-date strong {
+  font-size: 18px;
+}
+
+.birthday-body {
+  min-width: 0;
+}
+
+.birthday-top {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.birthday-top h3 {
+  margin-bottom: 4px;
+}
+
+.birthday-actions {
+  display: flex;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.birthday-note {
+  color: var(--ink);
+  margin-top: 10px;
+  overflow-wrap: anywhere;
 }
 
 .muted {
@@ -1193,6 +1249,29 @@ body.hide-money .money-text::after {
 
   .snapshot-item strong {
     font-size: 17px;
+  }
+
+  .birthday-card {
+    gap: 10px;
+    grid-template-columns: 72px minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .birthday-date {
+    min-height: 66px;
+  }
+
+  .birthday-date strong {
+    font-size: 16px;
+  }
+
+  .birthday-top {
+    display: grid;
+    gap: 8px;
+  }
+
+  .birthday-actions {
+    gap: 14px;
   }
 
   .calendar-weekdays,

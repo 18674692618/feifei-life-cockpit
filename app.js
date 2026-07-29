@@ -61,7 +61,8 @@ const defaultState = {
       memory: "晚上在木屋外面看星星，大家都安静了很久。",
       photos: []
     }
-  ]
+  ],
+  birthdays: []
 };
 
 let state = loadState();
@@ -79,7 +80,7 @@ const viewTitles = {
   fitness: { title: "健身", copy: "记录每月运动和爱爱" },
   assets: { title: "资产", copy: "家庭收入、支出和余额" },
   travel: { title: "旅行", copy: "费用、攻略和回忆" },
-  dashboard: { title: "总览", copy: "飞飞子的生活工作台" }
+  dashboard: { title: "生日", copy: "家人生日提醒" }
 };
 
 init();
@@ -90,6 +91,7 @@ function init() {
   bindFitness();
   bindAssets();
   bindTravel();
+  bindBirthdays();
   bindDataTools();
   bindInstall();
   registerServiceWorker();
@@ -141,13 +143,14 @@ function readOldTripState() {
 function stateScore(nextState) {
   const workouts = Array.isArray(nextState?.workouts) ? nextState.workouts.length : 0;
   const loveDays = Array.isArray(nextState?.loveDays) ? nextState.loveDays.length : 0;
+  const birthdays = Array.isArray(nextState?.birthdays) ? nextState.birthdays.length : 0;
   const monthlyRecords = Array.isArray(nextState?.monthlyRecords)
     ? nextState.monthlyRecords.filter((record) => !isDefaultMonthlyRecord(record)).length
     : 0;
   const trips = Array.isArray(nextState?.trips)
     ? nextState.trips.filter((trip) => !isDefaultTrip(trip)).length
     : 0;
-  return workouts + loveDays * 2 + monthlyRecords * 5 + trips * 4;
+  return workouts + loveDays * 2 + birthdays * 4 + monthlyRecords * 5 + trips * 4;
 }
 
 function isDefaultMonthlyRecord(record) {
@@ -169,11 +172,24 @@ function normalizeState(nextState) {
   nextState.workouts = dedupeWorkoutDates(nextState.workouts || defaultState.workouts);
   nextState.loveDays = dedupeDateRecords(nextState.loveDays || []);
   nextState.trips = Array.isArray(nextState.trips) ? nextState.trips : defaultState.trips;
+  nextState.birthdays = normalizeBirthdays(nextState.birthdays || []);
   nextState.financeItems = Array.isArray(nextState.financeItems) ? nextState.financeItems : [];
   nextState.monthlyRecords = Array.isArray(nextState.monthlyRecords) && nextState.monthlyRecords.length
     ? nextState.monthlyRecords.map(normalizeMonthlyRecord)
     : migrateFinanceItemsToMonthlyRecords(nextState.financeItems);
   return nextState;
+}
+
+function normalizeBirthdays(birthdays) {
+  return (birthdays || [])
+    .filter((item) => item?.name && item?.date)
+    .map((item) => ({
+      id: item.id || uid(),
+      name: String(item.name).trim(),
+      relation: String(item.relation || "").trim(),
+      date: item.date,
+      note: String(item.note || "").trim()
+    }));
 }
 
 function normalizeMonthlyRecord(record) {
@@ -369,6 +385,30 @@ function bindTravel() {
     pendingPhotos = await Promise.all([...event.target.files].map(readFile));
     renderPhotoPreview();
   });
+}
+
+function bindBirthdays() {
+  $("#birthdayForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = $("#birthdayId").value;
+    const existing = state.birthdays.find((item) => item.id === id);
+    const birthday = {
+      id: id || uid(),
+      name: $("#birthdayName").value.trim(),
+      relation: $("#birthdayRelation").value.trim(),
+      date: $("#birthdayDate").value,
+      note: $("#birthdayNote").value.trim()
+    };
+    state.birthdays = existing
+      ? state.birthdays.map((item) => (item.id === id ? birthday : item))
+      : [birthday, ...state.birthdays];
+    saveState();
+    resetBirthdayForm();
+    renderAll();
+    toast("生日已保存");
+  });
+
+  $("#resetBirthdayBtn").addEventListener("click", resetBirthdayForm);
 }
 
 function bindDataTools() {
@@ -618,42 +658,51 @@ function registerServiceWorker() {
 }
 
 function renderAll() {
-  renderDashboard();
+  renderBirthdays();
   renderFitness();
   renderAssets();
   renderTravel();
 }
 
-function renderDashboard() {
-  const finance = financeSummary(selectedFinanceMonth());
-  const travelCost = state.trips.reduce((sum, trip) => sum + Number(trip.cost || 0), 0);
-  const recentTrip = [...state.trips].sort((a, b) => new Date(b.startDate) - new Date(a.startDate))[0];
-  const week = workoutsThisWeek();
+function renderBirthdays() {
+  const sorted = sortedBirthdays();
+  const next = sorted[0];
+  const thisMonth = state.birthdays.filter((item) => item.date.slice(5, 7) === String(today.getMonth() + 1).padStart(2, "0"));
 
-  $("#dashNetWorth").textContent = formatMoney(finance.net);
-  $("#dashAssetChange").textContent = `本月结余 ${formatSigned(finance.surplus)}`;
-  $("#dashDebtRatio").textContent = `负债 ${formatMoney(finance.debt)}`;
-  $("#dashWorkoutCount").textContent = `${uniqueWorkoutDays(week)} 天`;
-  $("#dashWorkoutProgress").style.width = `${Math.min((uniqueWorkoutDays(week) / 4) * 100, 100)}%`;
-  $("#dashTravelCost").textContent = formatMoney(travelCost);
-  $("#dashTripCount").textContent = `${state.trips.length} 次旅行`;
-  $("#dashLastTrip").textContent = recentTrip ? `最近：${recentTrip.destination}` : "暂无记录";
+  $("#birthdayMonthCount").textContent = thisMonth.length;
+  $("#birthdayNextName").textContent = next ? next.name : "暂无";
+  $("#birthdayTotalCount").textContent = state.birthdays.length;
 
-  $("#focusList").innerHTML = [
-    ["练", uniqueWorkoutDays(week) >= 4 ? "本周锻炼已达标" : `本周还差 ${4 - uniqueWorkoutDays(week)} 天锻炼`, "日历点一下，就能把这个月哪些天动了记下来。"],
-    ["资", "更新本月家庭快照", "收入、支出、余额、公积金、负债、理财放在一张表。"],
-    ["旅", recentTrip ? `补完 ${recentTrip.destination} 的照片或回忆` : "新建一条旅行记录", "每年去了几次、花了多少一眼看到。"]
-  ]
-    .map(([icon, title, copy]) => `<div class="focus-item"><span class="focus-icon">${icon}</span><div><strong>${title}</strong><div class="muted">${copy}</div></div></div>`)
-    .join("");
+  $("#birthdayList").innerHTML = sorted
+    .map((item) => {
+      const nextInfo = nextBirthdayInfo(item.date);
+      const age = birthdayAge(item.date, nextInfo.nextDate);
+      return `
+        <article class="birthday-card">
+          <div class="birthday-date">
+            <span>${formatBirthdayMonthDay(item.date)}</span>
+            <strong>${nextInfo.daysLeft === 0 ? "今天" : `${nextInfo.daysLeft}天后`}</strong>
+          </div>
+          <div class="birthday-body">
+            <div class="birthday-top">
+              <div>
+                <h3>${escapeHtml(item.name)}</h3>
+                <div class="muted">${escapeHtml(item.relation || "家人")}${age ? ` · ${age}岁` : ""}</div>
+              </div>
+              <div class="birthday-actions">
+                <button class="text-button" type="button" data-edit-birthday="${item.id}">编辑</button>
+                <button class="text-button danger" type="button" data-delete-birthday="${item.id}">删除</button>
+              </div>
+            </div>
+            ${item.note ? `<div class="birthday-note">${escapeHtml(item.note)}</div>` : ""}
+          </div>
+        </article>
+      `;
+    })
+    .join("") || `<div class="muted">还没有生日记录。</div>`;
 
-  $("#signalList").innerHTML = [
-    ["家庭结余", finance.surplus >= 0 ? `本月结余 ${formatMoney(finance.surplus)}` : `本月超支 ${formatMoney(Math.abs(finance.surplus))}`],
-    ["家庭余额", `可用余额 + 公积金 + 理财：${formatMoney(finance.totalBalance)}`],
-    ["旅行预算", travelCost > 0 ? `历史单次平均 ${formatMoney(Math.round(travelCost / state.trips.length))}` : "还没有旅行成本记录。"]
-  ]
-    .map(([title, copy]) => `<div class="signal-item"><strong>${title}</strong><span class="muted">${copy}</span></div>`)
-    .join("");
+  $$("[data-edit-birthday]").forEach((button) => button.addEventListener("click", () => editBirthday(button.dataset.editBirthday)));
+  $$("[data-delete-birthday]").forEach((button) => button.addEventListener("click", () => deleteBirthday(button.dataset.deleteBirthday)));
 }
 
 function renderFitness() {
@@ -1028,12 +1077,38 @@ function deleteTrip(id) {
   renderAll();
 }
 
+function editBirthday(id) {
+  const birthday = state.birthdays.find((item) => item.id === id);
+  if (!birthday) return;
+  $("#birthdayId").value = birthday.id;
+  $("#birthdayName").value = birthday.name;
+  $("#birthdayRelation").value = birthday.relation || "";
+  $("#birthdayDate").value = birthday.date;
+  $("#birthdayNote").value = birthday.note || "";
+  $("#birthdayFormTitle").textContent = "编辑生日";
+  $("#birthdayName").focus();
+}
+
+function deleteBirthday(id) {
+  if (!confirm("删除这个生日吗？")) return;
+  state.birthdays = state.birthdays.filter((item) => item.id !== id);
+  saveState();
+  resetBirthdayForm();
+  renderAll();
+}
+
 function resetTripForm() {
   $("#tripForm").reset();
   $("#tripId").value = "";
   $("#tripFormTitle").textContent = "记录一次旅行";
   pendingPhotos = [];
   renderPhotoPreview();
+}
+
+function resetBirthdayForm() {
+  $("#birthdayForm").reset();
+  $("#birthdayId").value = "";
+  $("#birthdayFormTitle").textContent = "记录家人生日";
 }
 
 function renderPhotoPreview() {
@@ -1051,6 +1126,30 @@ function readFile(file) {
 
 function formatMoney(value) {
   return money.format(Number(value || 0));
+}
+
+function sortedBirthdays() {
+  return [...state.birthdays].sort((a, b) => nextBirthdayInfo(a.date).daysLeft - nextBirthdayInfo(b.date).daysLeft);
+}
+
+function nextBirthdayInfo(dateString) {
+  const [, month, day] = dateString.split("-").map(Number);
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  let nextDate = new Date(today.getFullYear(), month - 1, day);
+  if (nextDate < start) nextDate = new Date(today.getFullYear() + 1, month - 1, day);
+  const daysLeft = Math.round((nextDate - start) / 86400000);
+  return { nextDate, daysLeft };
+}
+
+function birthdayAge(dateString, nextDate) {
+  const [year] = dateString.split("-").map(Number);
+  if (!year || year < 1900) return "";
+  return nextDate.getFullYear() - year;
+}
+
+function formatBirthdayMonthDay(dateString) {
+  const [, month, day] = dateString.split("-").map(Number);
+  return `${month}月${day}日`;
 }
 
 function formatSigned(value) {

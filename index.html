@@ -17,8 +17,8 @@
     <div class="app-shell">
       <header class="app-header">
         <div>
-          <h1 id="appHeaderTitle">总览</h1>
-          <p class="header-copy" id="appHeaderCopy">飞飞子的生活工作台</p>
+          <h1 id="appHeaderTitle">生日</h1>
+          <p class="header-copy" id="appHeaderCopy">家人生日提醒</p>
         </div>
         <div class="header-actions">
           <button class="icon-button" id="installBtn" type="button" title="安装到桌面" aria-label="安装到桌面" hidden>＋</button>
@@ -57,58 +57,49 @@
             <circle class="tab-fill-blue" cx="35" cy="23" r="12" />
             <path class="tab-stroke" d="M12 18 7 13M17 10l-2-7M62 12l6-6M70 24l8-1M20 50l-6 5" />
           </svg>
-          <span class="tab-label">总览</span>
+          <span class="tab-label">生日</span>
         </button>
       </nav>
 
       <main>
         <section class="view active" id="dashboardView" data-view-panel="dashboard">
-          <section class="hero-grid">
-            <article class="hero-card asset-hero">
-              <p class="eyebrow">Nestworth</p>
-              <h2>本月家庭净资产</h2>
-              <strong class="hero-number money-text" id="dashNetWorth">¥0</strong>
-              <div class="hero-meta">
-                <span id="dashAssetChange">较上月 ¥0</span>
-                <span id="dashDebtRatio">负债率 0%</span>
-              </div>
-            </article>
-            <article class="hero-card">
-              <p class="eyebrow">Fitness</p>
-              <h2>本周训练完成</h2>
-              <strong class="hero-number" id="dashWorkoutCount">0 次</strong>
-              <div class="mini-progress"><span id="dashWorkoutProgress"></span></div>
-            </article>
-            <article class="hero-card">
-              <p class="eyebrow">Travel</p>
-              <h2>旅行成本与回忆</h2>
-              <strong class="hero-number money-text" id="dashTravelCost">¥0</strong>
-              <div class="hero-meta">
-                <span id="dashTripCount">0 次旅行</span>
-                <span id="dashLastTrip">暂无记录</span>
-              </div>
-            </article>
+          <section class="metric-row">
+            <article class="metric-card"><span>本月生日</span><strong id="birthdayMonthCount">0</strong></article>
+            <article class="metric-card"><span>最近生日</span><strong id="birthdayNextName">暂无</strong></article>
+            <article class="metric-card"><span>已记录家人</span><strong id="birthdayTotalCount">0</strong></article>
           </section>
 
           <section class="dashboard-grid">
             <article class="panel">
               <div class="panel-title">
                 <div>
-                  <p class="eyebrow">Today</p>
-                  <h2>今天最值得做的三件事</h2>
+                  <p class="eyebrow">Birthday</p>
+                  <h2 id="birthdayFormTitle">记录家人生日</h2>
                 </div>
               </div>
-              <div class="focus-list" id="focusList"></div>
+              <form id="birthdayForm" class="stack-form">
+                <input id="birthdayId" type="hidden" />
+                <label>名字<input id="birthdayName" type="text" placeholder="妈妈" required /></label>
+                <div class="field-grid">
+                  <label>关系<input id="birthdayRelation" type="text" placeholder="家人" /></label>
+                  <label>生日<input id="birthdayDate" type="date" required /></label>
+                </div>
+                <label>备注<textarea id="birthdayNote" rows="3" placeholder="喜欢什么、今年想送什么"></textarea></label>
+                <div class="button-row">
+                  <button class="primary-button" type="submit">保存生日</button>
+                  <button class="secondary-button" id="resetBirthdayBtn" type="button">清空</button>
+                </div>
+              </form>
             </article>
 
             <article class="panel">
               <div class="panel-title">
                 <div>
-                  <p class="eyebrow">Review</p>
-                  <h2>生活复盘信号</h2>
+                  <p class="eyebrow">Family</p>
+                  <h2>生日列表</h2>
                 </div>
               </div>
-              <div class="signal-list" id="signalList"></div>
+              <div class="birthday-list" id="birthdayList"></div>
             </article>
 
             <article class="panel sync-panel" id="cloudSyncPanel">
