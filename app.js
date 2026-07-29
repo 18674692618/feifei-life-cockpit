@@ -1,4 +1,6 @@
 const STORAGE_KEY = "feifei-life-cockpit-v1";
+const STORAGE_BACKUP_KEY = "feifei-life-cockpit-backup-v1";
+const STORAGE_MIRROR_KEY = "feifei-life-cockpit-data";
 const oldTripKey = "feifei-travel-world-v1";
 
 const today = new Date();
@@ -87,19 +89,72 @@ function init() {
 }
 
 function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return normalizeState({ ...defaultState, ...JSON.parse(saved) });
+  const candidates = [STORAGE_KEY, STORAGE_BACKUP_KEY, STORAGE_MIRROR_KEY]
+    .map(readStoredState)
+    .filter(Boolean);
 
-    const oldTrips = localStorage.getItem(oldTripKey);
-    if (oldTrips) {
-      const parsedTrips = JSON.parse(oldTrips);
-      if (Array.isArray(parsedTrips)) return normalizeState({ ...defaultState, trips: parsedTrips });
-    }
-  } catch {
-    return normalizeState(structuredClone(defaultState));
+  if (!candidates.length) {
+    const oldTrips = readOldTripState();
+    if (oldTrips) candidates.push(oldTrips);
   }
-  return normalizeState(structuredClone(defaultState));
+
+  const best = candidates.sort((a, b) => stateScore(b) - stateScore(a))[0];
+  const normalized = normalizeState(best ? { ...defaultState, ...best } : structuredClone(defaultState));
+  try {
+    persistState(normalized);
+  } catch {
+    // The app can still run with in-memory data if browser storage is temporarily unavailable.
+  }
+  return normalized;
+}
+
+function readStoredState(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed.state || parsed;
+  } catch {
+    return null;
+  }
+}
+
+function readOldTripState() {
+  try {
+    const raw = localStorage.getItem(oldTripKey);
+    if (!raw) return null;
+    const parsedTrips = JSON.parse(raw);
+    return Array.isArray(parsedTrips) ? { trips: parsedTrips } : null;
+  } catch {
+    return null;
+  }
+}
+
+function stateScore(nextState) {
+  const workouts = Array.isArray(nextState?.workouts) ? nextState.workouts.length : 0;
+  const loveDays = Array.isArray(nextState?.loveDays) ? nextState.loveDays.length : 0;
+  const monthlyRecords = Array.isArray(nextState?.monthlyRecords)
+    ? nextState.monthlyRecords.filter((record) => !isDefaultMonthlyRecord(record)).length
+    : 0;
+  const trips = Array.isArray(nextState?.trips)
+    ? nextState.trips.filter((trip) => !isDefaultTrip(trip)).length
+    : 0;
+  return workouts + loveDays * 2 + monthlyRecords * 5 + trips * 4;
+}
+
+function isDefaultMonthlyRecord(record) {
+  return record?.month === currentMonth
+    && Number(record.income) === 58000
+    && Number(record.expense) === 15691
+    && Number(record.familyBalance) === 50700
+    && Number(record.housingFund) === 180000
+    && Number(record.debt) === 620000
+    && Number(record.investment) === 143000;
+}
+
+function isDefaultTrip(trip) {
+  return (trip?.destination === "京都" && trip?.startDate === "2025-11-18")
+    || (trip?.destination === "阿勒泰" && trip?.startDate === "2024-06-04");
 }
 
 function normalizeState(nextState) {
@@ -162,7 +217,28 @@ function dedupeDateRecords(records) {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    persistState(state);
+  } catch {
+    toast("保存失败，请先导出数据备份");
+  }
+}
+
+function persistState(nextState) {
+  const normalized = normalizeState(structuredClone(nextState));
+  const payload = JSON.stringify(normalized);
+  const backup = JSON.stringify({ savedAt: new Date().toISOString(), state: normalized });
+  localStorage.setItem(STORAGE_KEY, payload);
+  try {
+    localStorage.setItem(STORAGE_MIRROR_KEY, payload);
+  } catch {
+    // Primary save already succeeded; mirror storage is best-effort.
+  }
+  try {
+    localStorage.setItem(STORAGE_BACKUP_KEY, backup);
+  } catch {
+    // Primary save already succeeded; backup storage is best-effort.
+  }
 }
 
 function setDefaultDates() {
