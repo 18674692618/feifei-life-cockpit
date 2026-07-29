@@ -398,7 +398,7 @@ function bindDataTools() {
     document.body.classList.toggle("hide-money");
   });
 
-  $("#exportBtn").addEventListener("click", () => {
+  $("#exportBtn")?.addEventListener("click", () => {
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), state }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -408,7 +408,7 @@ function bindDataTools() {
     URL.revokeObjectURL(url);
   });
 
-  $("#importInput").addEventListener("change", async (event) => {
+  $("#importInput")?.addEventListener("change", async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {

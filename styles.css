@@ -626,19 +626,25 @@ select:focus {
 
 .calendar-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .selected-day-toolbar {
   align-items: center;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.48);
   border: 1px solid rgba(238, 224, 190, 0.72);
   border-radius: 8px;
   display: flex;
   gap: 10px;
   justify-content: space-between;
-  margin: 12px 0;
-  padding: 8px;
+  margin: 10px 0;
+  padding: 6px;
+}
+
+.selected-day-toolbar strong {
+  font-size: 18px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .quick-actions {
@@ -1050,6 +1056,10 @@ body.hide-money .money-text::after {
     width: 32px;
   }
 
+  .header-actions {
+    gap: 6px;
+  }
+
   .module-tabs {
     border-radius: 18px 18px 0 0;
     bottom: 10px;
@@ -1173,21 +1183,57 @@ body.hide-money .money-text::after {
     gap: 5px;
   }
 
-  .selected-day-toolbar {
-    align-items: stretch;
+  .fitness-panel {
+    padding: 12px;
+  }
+
+  .fitness-panel .panel-title {
+    align-items: end;
     display: grid;
     gap: 8px;
-    margin: 10px 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .fitness-panel .eyebrow {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .fitness-panel .panel-title h3 {
+    font-size: 22px;
+    line-height: 1.12;
+  }
+
+  .fitness-panel .calendar-actions {
+    gap: 6px;
+  }
+
+  .fitness-panel .icon-button.small {
+    height: 30px;
+    width: 30px;
+  }
+
+  .selected-day-toolbar {
+    gap: 8px;
+    margin: 8px 0 10px;
+    padding: 5px;
+  }
+
+  .selected-day-toolbar strong {
+    font-size: 16px;
   }
 
   .quick-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 0;
   }
 
   .quick-action {
-    min-height: 38px;
-    padding: 0 8px;
+    font-size: 12px;
+    min-height: 32px;
+    padding: 0 9px;
   }
 
   .calendar-cell {
@@ -1223,7 +1269,6 @@ body.hide-money .money-text::after {
     font-size: 11px;
   }
 
-  .panel-title,
   .section-head,
   .trip-top,
   .signal-item,
