@@ -69,6 +69,7 @@ let state = loadState();
 let pendingPhotos = [];
 let selectedWorkoutMonth = currentMonth;
 let selectedWorkoutDate = todayISO;
+let selectedBirthdayFilter = "all";
 let deferredInstallPrompt = null;
 let cloudSyncTimer = null;
 
@@ -404,11 +405,30 @@ function bindBirthdays() {
       : [birthday, ...state.birthdays];
     saveState();
     resetBirthdayForm();
+    closeBirthdayEditor();
     renderAll();
     toast("生日已保存");
   });
 
-  $("#resetBirthdayBtn").addEventListener("click", resetBirthdayForm);
+  $("#newBirthdayBtn").addEventListener("click", () => {
+    resetBirthdayForm();
+    openBirthdayEditor();
+  });
+  $("#cancelBirthdayBtn").addEventListener("click", () => {
+    resetBirthdayForm();
+    closeBirthdayEditor();
+  });
+  $("#birthdaySearch").addEventListener("input", renderBirthdays);
+  $("[data-birthday-filter='all']").classList.add("active");
+  $$("[data-birthday-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedBirthdayFilter = button.dataset.birthdayFilter;
+      renderBirthdays();
+    });
+  });
+  $$("[data-relation-value]").forEach((button) => {
+    button.addEventListener("click", () => setBirthdayRelation(button.dataset.relationValue));
+  });
 }
 
 function bindDataTools() {
@@ -666,29 +686,37 @@ function renderAll() {
 
 function renderBirthdays() {
   const sorted = sortedBirthdays();
+  const filtered = filterBirthdays(sorted);
   const next = sorted[0];
   const thisMonth = state.birthdays.filter((item) => item.date.slice(5, 7) === String(today.getMonth() + 1).padStart(2, "0"));
+  const relationCounts = birthdayRelationCounts();
 
   $("#birthdayMonthCount").textContent = thisMonth.length;
   $("#birthdayNextName").textContent = next ? next.name : "暂无";
   $("#birthdayTotalCount").textContent = state.birthdays.length;
+  $$("[data-birthday-count]").forEach((item) => {
+    item.textContent = relationCounts[item.dataset.birthdayCount] || 0;
+  });
+  $$("[data-birthday-filter]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.birthdayFilter === selectedBirthdayFilter);
+  });
 
-  $("#birthdayList").innerHTML = sorted
+  $("#birthdayList").innerHTML = filtered
     .map((item) => {
       const nextInfo = nextBirthdayInfo(item.date);
       const age = birthdayAge(item.date, nextInfo.nextDate);
       return `
         <article class="birthday-card">
-          <div class="birthday-date">
-            <span>${formatBirthdayMonthDay(item.date)}</span>
-            <strong>${nextInfo.daysLeft === 0 ? "今天" : `${nextInfo.daysLeft}天后`}</strong>
-          </div>
           <div class="birthday-body">
             <div class="birthday-top">
               <div>
-                <h3>${escapeHtml(item.name)}</h3>
-                <div class="muted">${escapeHtml(item.relation || "家人")}${age ? ` · ${age}岁` : ""}</div>
+                <h3>${escapeHtml(item.name)} <span>${escapeHtml(item.relation || "家人")}</span></h3>
+                <div class="muted">公历：${formatDate(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
               </div>
+              <div class="birthday-countdown"><strong>${nextInfo.daysLeft === 0 ? "今天" : nextInfo.daysLeft}</strong><span>${nextInfo.daysLeft === 0 ? "生日" : "天后"}</span></div>
+            </div>
+            <div class="birthday-card-bottom">
+              <span>${formatBirthdayMonthDay(item.date)}</span>
               <div class="birthday-actions">
                 <button class="text-button" type="button" data-edit-birthday="${item.id}">编辑</button>
                 <button class="text-button danger" type="button" data-delete-birthday="${item.id}">删除</button>
@@ -1082,10 +1110,11 @@ function editBirthday(id) {
   if (!birthday) return;
   $("#birthdayId").value = birthday.id;
   $("#birthdayName").value = birthday.name;
-  $("#birthdayRelation").value = birthday.relation || "";
   $("#birthdayDate").value = birthday.date;
   $("#birthdayNote").value = birthday.note || "";
   $("#birthdayFormTitle").textContent = "编辑生日";
+  setBirthdayRelation(birthday.relation || "家人");
+  openBirthdayEditor();
   $("#birthdayName").focus();
 }
 
@@ -1108,7 +1137,17 @@ function resetTripForm() {
 function resetBirthdayForm() {
   $("#birthdayForm").reset();
   $("#birthdayId").value = "";
-  $("#birthdayFormTitle").textContent = "记录家人生日";
+  $("#birthdayFormTitle").textContent = "新增生日";
+  setBirthdayRelation("家人");
+}
+
+function openBirthdayEditor() {
+  $("#birthdayEditor").classList.remove("is-collapsed");
+  $("#birthdayEditor").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function closeBirthdayEditor() {
+  $("#birthdayEditor").classList.add("is-collapsed");
 }
 
 function renderPhotoPreview() {
@@ -1130,6 +1169,31 @@ function formatMoney(value) {
 
 function sortedBirthdays() {
   return [...state.birthdays].sort((a, b) => nextBirthdayInfo(a.date).daysLeft - nextBirthdayInfo(b.date).daysLeft);
+}
+
+function filterBirthdays(birthdays) {
+  const query = $("#birthdaySearch").value.trim().toLowerCase();
+  return birthdays.filter((item) => {
+    const relation = item.relation || "家人";
+    const haystack = [item.name, relation, item.note].join(" ").toLowerCase();
+    const matchesFilter = selectedBirthdayFilter === "all" || relation === selectedBirthdayFilter;
+    return matchesFilter && (!query || haystack.includes(query));
+  });
+}
+
+function birthdayRelationCounts() {
+  return state.birthdays.reduce((counts, item) => {
+    const relation = item.relation || "家人";
+    counts[relation] = (counts[relation] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function setBirthdayRelation(relation) {
+  $("#birthdayRelation").value = relation;
+  $$("[data-relation-value]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.relationValue === relation);
+  });
 }
 
 function nextBirthdayInfo(dateString) {

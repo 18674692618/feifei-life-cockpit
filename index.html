@@ -63,43 +63,66 @@
 
       <main>
         <section class="view active" id="dashboardView" data-view-panel="dashboard">
-          <section class="metric-row">
-            <article class="metric-card"><span>本月生日</span><strong id="birthdayMonthCount">0</strong></article>
-            <article class="metric-card"><span>最近生日</span><strong id="birthdayNextName">暂无</strong></article>
-            <article class="metric-card"><span>已记录家人</span><strong id="birthdayTotalCount">0</strong></article>
-          </section>
+          <section class="birthday-workspace">
+            <article class="birthday-home-panel">
+              <div class="birthday-filter-row" id="birthdayFilters">
+                <button class="birthday-filter active" type="button" data-birthday-filter="all">全部 <span id="birthdayTotalCount">0</span></button>
+                <button class="birthday-filter" type="button" data-birthday-filter="家人">家人 <span data-birthday-count="家人">0</span></button>
+                <button class="birthday-filter" type="button" data-birthday-filter="朋友">朋友 <span data-birthday-count="朋友">0</span></button>
+                <button class="birthday-filter" type="button" data-birthday-filter="同事">同事 <span data-birthday-count="同事">0</span></button>
+                <button class="birthday-filter" type="button" data-birthday-filter="同学">同学 <span data-birthday-count="同学">0</span></button>
+                <button class="birthday-filter" type="button" data-birthday-filter="亲戚">亲戚 <span data-birthday-count="亲戚">0</span></button>
+              </div>
+              <label class="birthday-search">
+                <span>⌕</span>
+                <input id="birthdaySearch" type="search" placeholder="输入姓名搜索..." />
+              </label>
+              <div class="birthday-summary-strip">
+                <div><span>本月生日</span><strong id="birthdayMonthCount">0</strong></div>
+                <div><span>最近生日</span><strong id="birthdayNextName">暂无</strong></div>
+              </div>
+              <div class="birthday-list" id="birthdayList"></div>
+              <button class="birthday-fab" id="newBirthdayBtn" type="button" aria-label="新增生日">＋</button>
+            </article>
 
-          <section class="dashboard-grid">
-            <article class="panel">
+            <article class="panel birthday-editor is-collapsed" id="birthdayEditor">
               <div class="panel-title">
                 <div>
                   <p class="eyebrow">Birthday</p>
-                  <h2 id="birthdayFormTitle">记录家人生日</h2>
+                  <h2 id="birthdayFormTitle">新增生日</h2>
                 </div>
               </div>
               <form id="birthdayForm" class="stack-form">
                 <input id="birthdayId" type="hidden" />
-                <label>名字<input id="birthdayName" type="text" placeholder="妈妈" required /></label>
-                <div class="field-grid">
-                  <label>关系<input id="birthdayRelation" type="text" placeholder="家人" /></label>
-                  <label>生日<input id="birthdayDate" type="date" required /></label>
+                <div class="profile-field">
+                  <span>*姓名</span>
+                  <input id="birthdayName" type="text" placeholder="妈妈" required />
                 </div>
-                <label>备注<textarea id="birthdayNote" rows="3" placeholder="喜欢什么、今年想送什么"></textarea></label>
+                <div class="profile-field">
+                  <span>*生日日期</span>
+                  <input id="birthdayDate" type="date" required />
+                </div>
+                <div class="profile-field align-start">
+                  <span>*关系</span>
+                  <div class="relation-picker">
+                    <input id="birthdayRelation" type="hidden" value="家人" />
+                    <button class="relation-chip active" type="button" data-relation-value="家人">家人</button>
+                    <button class="relation-chip" type="button" data-relation-value="朋友">朋友</button>
+                    <button class="relation-chip" type="button" data-relation-value="同事">同事</button>
+                    <button class="relation-chip" type="button" data-relation-value="同学">同学</button>
+                    <button class="relation-chip" type="button" data-relation-value="亲戚">亲戚</button>
+                    <button class="relation-chip" type="button" data-relation-value="伴侣">伴侣</button>
+                  </div>
+                </div>
+                <div class="profile-field">
+                  <span>备注</span>
+                  <input id="birthdayNote" type="text" placeholder="喜欢的礼物、美食、忌口等" />
+                </div>
                 <div class="button-row">
+                  <button class="secondary-button" id="cancelBirthdayBtn" type="button">取消</button>
                   <button class="primary-button" type="submit">保存生日</button>
-                  <button class="secondary-button" id="resetBirthdayBtn" type="button">清空</button>
                 </div>
               </form>
-            </article>
-
-            <article class="panel">
-              <div class="panel-title">
-                <div>
-                  <p class="eyebrow">Family</p>
-                  <h2>生日列表</h2>
-                </div>
-              </div>
-              <div class="birthday-list" id="birthdayList"></div>
             </article>
 
             <article class="panel sync-panel" id="cloudSyncPanel">
