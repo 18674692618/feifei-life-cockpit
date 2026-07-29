@@ -127,23 +127,26 @@
               </article>
             </div>
 
-            <article class="panel sync-panel" id="cloudSyncPanel">
-              <div class="panel-title">
-                <div>
-                  <p class="eyebrow">Cloud</p>
-                  <h2>云端保存</h2>
+            <div class="cloud-modal is-collapsed" id="cloudSyncPanel" aria-hidden="true">
+              <article class="panel cloud-dialog" role="dialog" aria-modal="true" aria-labelledby="cloudSyncTitle">
+                <div class="panel-title">
+                  <div>
+                    <p class="eyebrow">Cloud</p>
+                    <h2 id="cloudSyncTitle">云端保存</h2>
+                  </div>
                 </div>
-              </div>
-              <div class="stack-form">
-                <label>同步地址<input id="cloudSyncUrl" type="url" placeholder="Google 同步地址" /></label>
-                <div class="sync-actions">
-                  <button class="primary-button" id="saveCloudUrlBtn" type="button">保存地址</button>
-                  <button class="secondary-button" id="uploadCloudBtn" type="button">上传</button>
-                  <button class="secondary-button" id="restoreCloudBtn" type="button">恢复</button>
+                <div class="stack-form">
+                  <label>同步地址<input id="cloudSyncUrl" type="url" placeholder="Google 同步地址" /></label>
+                  <div class="sync-actions">
+                    <button class="primary-button" id="saveCloudUrlBtn" type="button">保存地址</button>
+                    <button class="secondary-button" id="uploadCloudBtn" type="button">上传</button>
+                    <button class="secondary-button" id="restoreCloudBtn" type="button">恢复</button>
+                  </div>
+                  <button class="secondary-button" id="closeCloudSyncBtn" type="button">关闭</button>
+                  <div class="muted" id="cloudSyncStatus">未配置</div>
                 </div>
-                <div class="muted" id="cloudSyncStatus">未配置</div>
-              </div>
-            </article>
+              </article>
+            </div>
           </section>
         </section>
 

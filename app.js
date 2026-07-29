@@ -8,7 +8,7 @@ const oldTripKey = "feifei-travel-world-v1";
 const today = new Date();
 const currentMonth = today.toISOString().slice(0, 7);
 const todayISO = today.toISOString().slice(0, 10);
-const APP_VERSION = "v20";
+const APP_VERSION = "v21";
 
 const defaultState = {
   workouts: [
@@ -451,7 +451,11 @@ function bindDataTools() {
 
   $("#cloudBtn").addEventListener("click", () => {
     showView("dashboard");
-    $("#cloudSyncPanel").scrollIntoView({ behavior: "smooth", block: "center" });
+    openCloudSyncPanel();
+  });
+  $("#closeCloudSyncBtn").addEventListener("click", closeCloudSyncPanel);
+  $("#cloudSyncPanel").addEventListener("click", (event) => {
+    if (event.target.id === "cloudSyncPanel") closeCloudSyncPanel();
   });
 
   $("#saveCloudUrlBtn").addEventListener("click", () => {
@@ -728,9 +732,6 @@ function renderBirthdays() {
                 <div class="muted">公历：${formatBirthdayMonthDay(item.date)}${age ? ` · ${age}岁生日` : ""}</div>
               </div>
               <div class="birthday-countdown"><strong>${nextInfo.daysLeft === 0 ? "今天" : nextInfo.daysLeft}</strong><span>${nextInfo.daysLeft === 0 ? "生日" : "天后"}</span></div>
-            </div>
-            <div class="birthday-card-bottom">
-              <span>${formatBirthdayMonthDay(item.date)}</span>
             </div>
           </div>
         </button>
@@ -1159,6 +1160,18 @@ function closeBirthdayEditor() {
   const editor = $("#birthdayEditor");
   editor.classList.add("is-collapsed");
   editor.setAttribute("aria-hidden", "true");
+}
+
+function openCloudSyncPanel() {
+  const panel = $("#cloudSyncPanel");
+  panel.classList.remove("is-collapsed");
+  panel.setAttribute("aria-hidden", "false");
+}
+
+function closeCloudSyncPanel() {
+  const panel = $("#cloudSyncPanel");
+  panel.classList.add("is-collapsed");
+  panel.setAttribute("aria-hidden", "true");
 }
 
 function makeBirthdayFabDraggable() {

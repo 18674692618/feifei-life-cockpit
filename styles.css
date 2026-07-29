@@ -290,10 +290,6 @@ h3 {
   grid-template-columns: 1fr 1fr;
 }
 
-.sync-panel {
-  grid-column: 1 / -1;
-}
-
 .birthday-workspace {
   display: grid;
   gap: 12px;
@@ -783,17 +779,6 @@ select:focus {
   padding-bottom: 2px;
 }
 
-.birthday-card-bottom {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
-.birthday-card-bottom > span {
-  color: var(--muted);
-  font-weight: 900;
-}
-
 .birthday-fab {
   align-items: center;
   background: #d8755d;
@@ -820,7 +805,8 @@ select:focus {
   right: auto;
 }
 
-.birthday-modal {
+.birthday-modal,
+.cloud-modal {
   align-items: end;
   background: rgba(18, 21, 18, 0.36);
   backdrop-filter: blur(12px);
@@ -832,7 +818,8 @@ select:focus {
   z-index: 80;
 }
 
-.birthday-editor {
+.birthday-editor,
+.cloud-dialog {
   background: rgba(255, 250, 244, 0.84);
   max-height: min(82vh, 720px);
   max-width: 560px;
