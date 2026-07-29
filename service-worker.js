@@ -1,4 +1,4 @@
-const CACHE_NAME = "feifei-life-cockpit-v18";
+const CACHE_NAME = "feifei-life-cockpit-v19";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -30,7 +30,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(withFreshCache(event.request))
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
@@ -43,6 +43,14 @@ self.addEventListener("fetch", (event) => {
       }))
   );
 });
+
+function withFreshCache(request) {
+  const url = new URL(request.url);
+  if (url.origin === self.location.origin && ["document", "script", "style", "worker"].includes(request.destination)) {
+    return new Request(request, { cache: "no-store" });
+  }
+  return request;
+}
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {

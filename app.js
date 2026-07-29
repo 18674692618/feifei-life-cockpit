@@ -7,6 +7,7 @@ const oldTripKey = "feifei-travel-world-v1";
 const today = new Date();
 const currentMonth = today.toISOString().slice(0, 7);
 const todayISO = today.toISOString().slice(0, 10);
+const APP_VERSION = "v19";
 
 const defaultState = {
   workouts: [
@@ -657,7 +658,7 @@ function registerServiceWorker() {
       window.location.reload();
     });
 
-    navigator.serviceWorker.register("./service-worker.js").then((registration) => {
+    navigator.serviceWorker.register(`./service-worker.js?version=${APP_VERSION}`, { updateViaCache: "none" }).then((registration) => {
       registration.update();
 
       if (registration.waiting) {
